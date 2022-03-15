@@ -1,7 +1,6 @@
 ## About
 
-This implementation is not optimised for AI training. If you'd like
-to do so, wait for Python/C implementation or help by contributing your own.
+This implementation is not optimised for AI training.
 
 ## Compile
 
