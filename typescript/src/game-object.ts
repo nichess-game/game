@@ -32,7 +32,7 @@ export abstract class Piece extends GameObject {
 
 export class Mage extends Piece {
   constructor(x: number, y: number, player: Player) {
-    super(x, y, player, 'mage', 300, 80)
+    super(x, y, player, 'mage', 280, 80)
   }
 }
 
@@ -50,7 +50,7 @@ export class Warrior extends Piece {
 
 export class Pawn extends Piece {
   constructor(x: number, y: number, player: Player) {
-    super(x, y, player, 'pawn', 300, 0)
+    super(x, y, player, 'pawn', 300, 10)
   }
 }
 

@@ -53,6 +53,13 @@ export class Game {
       this._board.addGameObject(destinationX, destinationY, new Empty(destinationX, destinationY))
       return true
     }
+
+    if(destinationPiece instanceof Piece && destinationPiece.player != pawn.player) {
+      destinationPiece.healthPoints -= pawn.abilityPoints
+      this._board.removeIfDead(destinationPiece)
+      return true
+    }
+
     return false
     
   }
