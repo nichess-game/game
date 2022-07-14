@@ -3,7 +3,7 @@
 Hosted at http://www.nichess.org (using Heroku free tier. If it doesn't load instantly, wait 10
 seconds and refresh the page).
 
-For more information about the game, visit: https://nichess-game.github.io
+Documentation: https://nichess-game.github.io
 
 ## Contribute
 

@@ -11,8 +11,8 @@ export class Board {
 
   constructor() {
     this.board = new Map<string, GameObject>()
-    this.height = 10
-    this.width = 10
+    this.height = 8
+    this.width = 8
     this._phase = Phase.MOVE
     this._playerTurn = Player.PLAYER_1
     for(var i = 0; i < this.height; i++) {
@@ -21,37 +21,22 @@ export class Board {
         var go = new Empty(i, j)
         this.board.set(JSON.stringify(p), go)
       }
-
       // player_1
-      this.board.set(JSON.stringify(new Position(0, 0)), new Assassin(0, 0, Player.PLAYER_1))
-      this.board.set(JSON.stringify(new Position(1, 0)), new Warrior(1, 0, Player.PLAYER_1))
-      this.board.set(JSON.stringify(new Position(3, 0)), new Mage(3, 0, Player.PLAYER_1))
-      this.board.set(JSON.stringify(new Position(4, 0)), new King(4, 0, Player.PLAYER_1))
-      this.board.set(JSON.stringify(new Position(5, 0)), new Mage(5, 0, Player.PLAYER_1))
-      this.board.set(JSON.stringify(new Position(8, 0)), new Warrior(8, 0, Player.PLAYER_1))
-      this.board.set(JSON.stringify(new Position(9, 0)), new Assassin(9, 0, Player.PLAYER_1))
-
-      this.board.set(JSON.stringify(new Position(2, 1)), new Pawn(2, 1, Player.PLAYER_1))
-      this.board.set(JSON.stringify(new Position(3, 1)), new Pawn(3, 1, Player.PLAYER_1))
-      this.board.set(JSON.stringify(new Position(4, 1)), new Pawn(4, 1, Player.PLAYER_1))
-      this.board.set(JSON.stringify(new Position(5, 1)), new Pawn(5, 1, Player.PLAYER_1))
-      this.board.set(JSON.stringify(new Position(6, 1)), new Pawn(6, 1, Player.PLAYER_1))
-
-
+      this.board.set(JSON.stringify(new Position(0, 0)), new King(0, 0, Player.PLAYER_1));
+      this.board.set(JSON.stringify(new Position(0, 1)), new Pawn(0, 1, Player.PLAYER_1));
+      this.board.set(JSON.stringify(new Position(1, 1)), new Pawn(1, 1, Player.PLAYER_1));
+      this.board.set(JSON.stringify(new Position(7, 0)), new Assassin(7, 0, Player.PLAYER_1));
+      this.board.set(JSON.stringify(new Position(3, 1)), new Warrior(3, 1, Player.PLAYER_1));
+      this.board.set(JSON.stringify(new Position(4, 1)), new Mage(4, 1, Player.PLAYER_1));
+      this.board.set(JSON.stringify(new Position(5, 1)), new Pawn(5, 1, Player.PLAYER_1));
       // player_2
-      this.board.set(JSON.stringify(new Position(0, 9)), new Assassin(0, 9, Player.PLAYER_2))
-      this.board.set(JSON.stringify(new Position(1, 9)), new Warrior(1, 9, Player.PLAYER_2))
-      this.board.set(JSON.stringify(new Position(3, 9)), new Mage(3, 9, Player.PLAYER_2))
-      this.board.set(JSON.stringify(new Position(4, 9)), new King(4, 9, Player.PLAYER_2))
-      this.board.set(JSON.stringify(new Position(5, 9)), new Mage(5, 9, Player.PLAYER_2))
-      this.board.set(JSON.stringify(new Position(8, 9)), new Warrior(8, 9, Player.PLAYER_2))
-      this.board.set(JSON.stringify(new Position(9, 9)), new Assassin(9, 9, Player.PLAYER_2))
-
-      this.board.set(JSON.stringify(new Position(2, 8)), new Pawn(2, 8, Player.PLAYER_2))
-      this.board.set(JSON.stringify(new Position(3, 8)), new Pawn(3, 8, Player.PLAYER_2))
-      this.board.set(JSON.stringify(new Position(4, 8)), new Pawn(4, 8, Player.PLAYER_2))
-      this.board.set(JSON.stringify(new Position(5, 8)), new Pawn(5, 8, Player.PLAYER_2))
-      this.board.set(JSON.stringify(new Position(6, 8)), new Pawn(6, 8, Player.PLAYER_2))
+      this.board.set(JSON.stringify(new Position(7, 7)), new King(7, 7, Player.PLAYER_2));
+      this.board.set(JSON.stringify(new Position(7, 6)), new Pawn(7, 6, Player.PLAYER_2));
+      this.board.set(JSON.stringify(new Position(6, 6)), new Pawn(6, 6, Player.PLAYER_2));
+      this.board.set(JSON.stringify(new Position(0, 7)), new Assassin(0, 7, Player.PLAYER_2));
+      this.board.set(JSON.stringify(new Position(4, 6)), new Warrior(4, 6, Player.PLAYER_2));
+      this.board.set(JSON.stringify(new Position(2, 6)), new Pawn(2, 6, Player.PLAYER_2));
+      this.board.set(JSON.stringify(new Position(3, 6)), new Mage(3, 6, Player.PLAYER_2));
 
     }
   }
