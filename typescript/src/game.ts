@@ -44,6 +44,7 @@ export class Game {
     this._board = new Board()
     this._gameOver = false
     this._winner = null
+    this._history = []
   }
 
   _pawnAbility(pawn: Pawn, destinationX: number, destinationY: number): boolean {
