@@ -72,7 +72,7 @@ export class Board {
     const s = ss[2].split(',')
     for(let i = 0; i < this.height; i++) {
       for(let j = 0; j < this.width; j++) {
-        let currentObject = s[i*10 + j]
+        let currentObject = s[i*this.height + j]
         if(currentObject == 'empty') {
           newBoard.set(JSON.stringify(new Position(j,i)), new Empty(j,i))
         } else {
