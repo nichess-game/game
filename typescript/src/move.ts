@@ -1,9 +1,13 @@
 export class Move {
-  public x: number
-  public y: number
+  public srcX: number
+  public srcY: number
+  public dstX: number
+  public dstY: number
 
-  constructor(x: number, y: number) {
-    this.x = x
-    this.y = y 
+  constructor(srcX: number, srcY: number, dstX: number, dstY: number) {
+    this.srcX = srcX
+    this.srcY = srcY
+    this.dstX = dstX
+    this.dstY = dstY
   }
 }

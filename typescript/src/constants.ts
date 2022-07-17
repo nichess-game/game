@@ -12,7 +12,7 @@ export enum Phase {
 
 export const WarriorMoveOffsets = [
   [-1,-1],[-1,0],[-1,1],
-  [0,-2],[0,-1],[0,1],[0,2],
+  [0,-1],[0,1],
   [1,-1],[1,0],[1,1]
 ]
 export const Player1PawnMoveOffsets = [

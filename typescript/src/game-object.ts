@@ -32,31 +32,31 @@ export abstract class Piece extends GameObject {
 
 export class Mage extends Piece {
   constructor(x: number, y: number, player: Player) {
-    super(x, y, player, 'mage', 280, 80)
+    super(x, y, player, 'mage', 230, 80)
   }
 }
 
 export class King extends Piece {
   constructor(x: number, y: number, player: Player) {
-    super(x, y, player, 'king', 200, 30)
+    super(x, y, player, 'king', 200, 60)
   }
 }
 
 export class Warrior extends Piece {
   constructor(x: number, y: number, player: Player) {
-    super(x, y, player, 'warrior', 600, 100)
+    super(x, y, player, 'warrior', 500, 100)
   }
 }
 
 export class Pawn extends Piece {
   constructor(x: number, y: number, player: Player) {
-    super(x, y, player, 'pawn', 300, 10)
+    super(x, y, player, 'pawn', 300, 30)
   }
 }
 
 export class Assassin extends Piece {
   constructor(x: number, y: number, player: Player) {
-    super(x, y, player, 'assassin', 20, 200)
+    super(x, y, player, 'assassin', 110, 120)
   }
 }
 

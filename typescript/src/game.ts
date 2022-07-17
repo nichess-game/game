@@ -8,11 +8,15 @@ export class Game {
   private _board: Board
   private _gameOver: boolean 
   private _winner: Player
+  private _history: Array<[Move, Ability]>
+  private _lastMove: Move
 
   constructor() {
     this._board = new Board()
     this._gameOver = false
     this._winner = null
+    this._history = []
+    this._lastMove = null
   }
   
   move(pieceX: number, pieceY: number, destinationX: number, destinationY: number): boolean {
@@ -25,9 +29,10 @@ export class Game {
     if(!this._board.isOffBoard(destinationX, destinationY) && this._board.isEmpty(destinationX, destinationY)) {
       let legalMoves: Move[] = this.legalMoves(pieceX, pieceY)
       for(let i = 0; i < legalMoves.length; i++) {
-        if(legalMoves[i].x == destinationX && legalMoves[i].y == destinationY) {
+        if(legalMoves[i].dstX == destinationX && legalMoves[i].dstY == destinationY) {
           this._board.movePiece(piece, destinationX, destinationY)
           this._board.setPhase(Phase.ABILITY)
+          this._lastMove = new Move(pieceX, pieceY, destinationX, destinationY)
           return true
         }
       }
@@ -107,7 +112,7 @@ export class Game {
     var success: boolean = false
 
     for(let i = 0; i < legalAbilities.length; i++) {
-      if(legalAbilities[i].x == destinationX && legalAbilities[i].y == destinationY) {
+      if(legalAbilities[i].dstX == destinationX && legalAbilities[i].dstY == destinationY) {
         if(sourcePiece instanceof Pawn) {
           success = this._pawnAbility(sourcePiece, destinationX, destinationY)
         }
@@ -122,6 +127,8 @@ export class Game {
     }
     if(success) {
       this._updateGameOver()
+      var a = new Ability(pieceX, pieceY, destinationX, destinationY)
+      this._history.push([this._lastMove, a])
       this._board.changePlayerTurn()
       this._board.setPhase(Phase.MOVE)
     }
@@ -140,7 +147,7 @@ export class Game {
     for(let i = 0; i < abilityOffsets.length; i++) {
       const x = sourcePiece.x + abilityOffsets[i][0]
       const y = sourcePiece.y + abilityOffsets[i][1]
-      retval.push(new Ability(x,y))
+      retval.push(new Ability(pieceX, pieceY, x, y))
     }
     return retval
   }
@@ -189,7 +196,7 @@ export class Game {
 
       }
       if(this._board.getGameObjectByCoordinates(x,y) instanceof Empty) {
-        retval.push(new Move(x,y))
+        retval.push(new Move(pieceX, pieceY, x, y))
       }
     }
     
@@ -230,6 +237,10 @@ export class Game {
 
   boardFromString(encodedBoard: string): void {
     this._board.fromString(encodedBoard)
+  }
+
+  history(): Array<[Move, Ability]> {
+    return this._history
   }
 
 }
