@@ -141,13 +141,16 @@ export class Game {
       return []
     var retval: Ability[] = []
     var sourcePiece = this._board.getGameObjectByCoordinates(pieceX, pieceY) as Piece
-    if(sourcePiece.player != this._board.playerTurn()) {
+    if((sourcePiece.player != this._board.playerTurn()) ||
+      sourcePiece instanceof Wall) {
       return []
     }
     var abilityOffsets = getAbilityOffsets(sourcePiece)
     for(let i = 0; i < abilityOffsets.length; i++) {
       const x = sourcePiece.x + abilityOffsets[i][0]
       const y = sourcePiece.y + abilityOffsets[i][1]
+      if(y < 0 || y >= this._board.height || x < 0 || x >= this._board.height)
+        continue
       retval.push(new Ability(pieceX, pieceY, x, y))
     }
     return retval
@@ -176,15 +179,17 @@ export class Game {
       return []
     var retval: Move[] = []
     var sourcePiece = this._board.getGameObjectByCoordinates(pieceX, pieceY) as Piece
-    if(sourcePiece.player != this._board.playerTurn()) {
+    if((sourcePiece.player != this._board.playerTurn()) ||
+      sourcePiece instanceof Wall) {
       return []
     }
     var moveOffsets = getMoveOffsets(sourcePiece)
     for(let i = 0; i < moveOffsets.length; i++) {
       const x = sourcePiece.x + moveOffsets[i][0]
       const y = sourcePiece.y + moveOffsets[i][1]
-      // check that warrior/pawn can't jump over pieces
-      // this is bad, but move generation in general is tricky, so it will do for now
+      if(y < 0 || y >= this._board.height || x < 0 || x >= this._board.height)
+        continue
+      // check that pawn can't jump over pieces
       if((sourcePiece instanceof Pawn) || (sourcePiece instanceof Warrior)) {
         if(moveOffsets[i][1] == 2) {
           if(!this._board.isEmpty(x, y-1))
