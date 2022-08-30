@@ -56,7 +56,8 @@ function getAbilityInput() {
 
 ### move(pieceX: number, pieceY: number, destinationX: number, destinationY: number): boolean
 
-Returns true if the move succeeded or false if it failed.
+Returns true if the move succeeded or false if it failed. If all the arguments are -1, move will be
+skipped.
 
 ### reset(): void
 
@@ -64,7 +65,8 @@ Resets the game.
 
 ### ability(pieceX: number, pieceY: number, destinationX: number, destinationY: number): boolean
 
-Returns true if the ability succeeded or false if it failed.
+Returns true if the ability succeeded or false if it failed. If all the arguments are -1, ability
+will be skipped. 
 
 ### legalAbilities(pieceX: number, pieceY: number): Ability[]
 
@@ -105,3 +107,10 @@ Example of an encoded board:
 ### boardFromString(encodedBoard: string): void
 
 Creates a new game with the same state as encodedBoard.
+
+
+### history(): Array<[Move, Ability]> 
+
+### playerTurn(): Player
+
+Returns 0 if it's PLAYER_1's turn, otherwise 1.

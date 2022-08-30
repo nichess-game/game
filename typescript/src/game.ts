@@ -22,6 +22,12 @@ export class Game {
   move(pieceX: number, pieceY: number, destinationX: number, destinationY: number): boolean {
     if(this._board.phase() != Phase.MOVE)
       return false
+    // skip move
+    if(pieceX == -1 && pieceY == -1 && destinationX == -1 && destinationY == -1) {
+      this._board.setPhase(Phase.ABILITY)
+      this._lastMove = new Move(pieceX, pieceY, destinationX, destinationY)
+      return true
+    }
     var piece = this._board.getGameObjectByCoordinates(pieceX, pieceY) as Piece
     if(piece.player != this._board.playerTurn()) {
       return false
@@ -104,6 +110,15 @@ export class Game {
   ability(pieceX: number, pieceY: number, destinationX: number, destinationY: number): boolean {
     if(this._board.phase() != Phase.ABILITY)
       return false
+
+    // skip ability
+    if(pieceX == -1 && pieceY == -1 && destinationX == -1 && destinationY == -1) {
+      var a = new Ability(pieceX, pieceY, destinationX, destinationY)
+      this._history.push([this._lastMove, a])
+      this._board.changePlayerTurn()
+      this._board.setPhase(Phase.MOVE)
+      return true
+    }
 
     var sourcePiece = this._board.getGameObjectByCoordinates(pieceX, pieceY) as Piece
     if(sourcePiece.player != this._board.playerTurn()) {
@@ -247,6 +262,10 @@ export class Game {
 
   history(): Array<[Move, Ability]> {
     return this._history
+  }
+
+  playerTurn(): Player {
+    return this._board.playerTurn()
   }
 
 }
