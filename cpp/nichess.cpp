@@ -267,11 +267,17 @@ class Game {
 
     void print() {
       for(int i = NUM_ROWS-1; i >= 0; i--) {
+				std::cout << i << " ";
         for(int j = 0; j < NUM_COLUMNS; j++) {
           std::cout << std::string(board[coordinatesToBoardIndex(j, i)]) << " ";
         }
         std::cout << "\n";
       } 
+			std::cout << " ";
+			for(int i = 0; i < NUM_COLUMNS; i++) {
+				std::cout << " " << i;
+			}
+			std::cout << "\n";
     }
 
     void makeMove(int moveSrcIdx, int moveDstIdx) {
