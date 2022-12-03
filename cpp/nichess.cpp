@@ -281,36 +281,88 @@ class Piece {
 
 class Game {
   private: 
-    Piece board[64];
-    Piece p1King;
-    Piece p2King;
-    std::vector<std::vector<Piece>> playerToPieces{NUM_PLAYERS};
+    Piece* board[64];
+    Piece* p2King;
+    Piece* p1King;
+    std::vector<std::vector<Piece*>> playerToPieces{NUM_PLAYERS};
     Player currentPlayer;
   public:
     Game() {
       currentPlayer = Player::PLAYER_1;
       // Create starting position
-      board[coordinatesToBoardIndex(0,0)] = Piece(PieceType::P1_KING, KING_STARTING_HEALTH_POINTS, coordinatesToBoardIndex(0,0));
-      board[coordinatesToBoardIndex(0,1)] = Piece(PieceType::P1_PAWN, PAWN_STARTING_HEALTH_POINTS, coordinatesToBoardIndex(0,1));
-      board[coordinatesToBoardIndex(1,1)] = Piece(PieceType::P1_PAWN, PAWN_STARTING_HEALTH_POINTS, coordinatesToBoardIndex(1,1));
-      board[coordinatesToBoardIndex(7,0)] = Piece(PieceType::P1_ASSASSIN, ASSASSIN_STARTING_HEALTH_POINTS, coordinatesToBoardIndex(7,0));
-      board[coordinatesToBoardIndex(3,1)] = Piece(PieceType::P1_WARRIOR, WARRIOR_STARTING_HEALTH_POINTS, coordinatesToBoardIndex(3,1));
-      board[coordinatesToBoardIndex(4,1)] = Piece(PieceType::P1_MAGE, MAGE_STARTING_HEALTH_POINTS, coordinatesToBoardIndex(4,1));
-      board[coordinatesToBoardIndex(5,1)] = Piece(PieceType::P1_PAWN, PAWN_STARTING_HEALTH_POINTS, coordinatesToBoardIndex(5,1));
+      board[coordinatesToBoardIndex(0,0)] = new Piece(PieceType::P1_KING, KING_STARTING_HEALTH_POINTS, coordinatesToBoardIndex(0,0));
+      board[coordinatesToBoardIndex(0,1)] = new Piece(PieceType::P1_PAWN, PAWN_STARTING_HEALTH_POINTS, coordinatesToBoardIndex(0,1));
+      board[coordinatesToBoardIndex(1,1)] = new Piece(PieceType::P1_PAWN, PAWN_STARTING_HEALTH_POINTS, coordinatesToBoardIndex(1,1));
+      board[coordinatesToBoardIndex(7,0)] = new Piece(PieceType::P1_ASSASSIN, ASSASSIN_STARTING_HEALTH_POINTS, coordinatesToBoardIndex(7,0));
+      board[coordinatesToBoardIndex(3,1)] = new Piece(PieceType::P1_WARRIOR, WARRIOR_STARTING_HEALTH_POINTS, coordinatesToBoardIndex(3,1));
+      board[coordinatesToBoardIndex(4,1)] = new Piece(PieceType::P1_MAGE, MAGE_STARTING_HEALTH_POINTS, coordinatesToBoardIndex(4,1));
+      board[coordinatesToBoardIndex(5,1)] = new Piece(PieceType::P1_PAWN, PAWN_STARTING_HEALTH_POINTS, coordinatesToBoardIndex(5,1));
 
-      board[coordinatesToBoardIndex(7,7)] = Piece(PieceType::P2_KING, KING_STARTING_HEALTH_POINTS, coordinatesToBoardIndex(7,7));
-      board[coordinatesToBoardIndex(7,6)] = Piece(PieceType::P2_PAWN, PAWN_STARTING_HEALTH_POINTS, coordinatesToBoardIndex(7,6));
-      board[coordinatesToBoardIndex(6,6)] = Piece(PieceType::P2_PAWN, PAWN_STARTING_HEALTH_POINTS, coordinatesToBoardIndex(6,6));
-      board[coordinatesToBoardIndex(0,7)] = Piece(PieceType::P2_ASSASSIN, ASSASSIN_STARTING_HEALTH_POINTS, coordinatesToBoardIndex(0,7));
-      board[coordinatesToBoardIndex(4,6)] = Piece(PieceType::P2_WARRIOR, WARRIOR_STARTING_HEALTH_POINTS, coordinatesToBoardIndex(4,6));
-      board[coordinatesToBoardIndex(2,6)] = Piece(PieceType::P2_MAGE, MAGE_STARTING_HEALTH_POINTS, coordinatesToBoardIndex(2,6));
-      board[coordinatesToBoardIndex(3,6)] = Piece(PieceType::P2_PAWN, PAWN_STARTING_HEALTH_POINTS, coordinatesToBoardIndex(3,6));
+      board[coordinatesToBoardIndex(7,7)] = new Piece(PieceType::P2_KING, KING_STARTING_HEALTH_POINTS, coordinatesToBoardIndex(7,7));
+      board[coordinatesToBoardIndex(7,6)] = new Piece(PieceType::P2_PAWN, PAWN_STARTING_HEALTH_POINTS, coordinatesToBoardIndex(7,6));
+      board[coordinatesToBoardIndex(6,6)] = new Piece(PieceType::P2_PAWN, PAWN_STARTING_HEALTH_POINTS, coordinatesToBoardIndex(6,6));
+      board[coordinatesToBoardIndex(0,7)] = new Piece(PieceType::P2_ASSASSIN, ASSASSIN_STARTING_HEALTH_POINTS, coordinatesToBoardIndex(0,7));
+      board[coordinatesToBoardIndex(4,6)] = new Piece(PieceType::P2_WARRIOR, WARRIOR_STARTING_HEALTH_POINTS, coordinatesToBoardIndex(4,6));
+      board[coordinatesToBoardIndex(2,6)] = new Piece(PieceType::P2_MAGE, MAGE_STARTING_HEALTH_POINTS, coordinatesToBoardIndex(2,6));
+      board[coordinatesToBoardIndex(3,6)] = new Piece(PieceType::P2_PAWN, PAWN_STARTING_HEALTH_POINTS, coordinatesToBoardIndex(3,6));
+
+      board[coordinatesToBoardIndex(0,2)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(0,2));
+      board[coordinatesToBoardIndex(0,3)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(0,3));
+      board[coordinatesToBoardIndex(0,4)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(0,4));
+      board[coordinatesToBoardIndex(0,5)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(0,5));
+      board[coordinatesToBoardIndex(0,6)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(0,6));
+      board[coordinatesToBoardIndex(1,0)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(1,0));
+      board[coordinatesToBoardIndex(1,2)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(1,2));
+      board[coordinatesToBoardIndex(1,3)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(1,3));
+      board[coordinatesToBoardIndex(1,4)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(1,4));
+      board[coordinatesToBoardIndex(1,5)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(1,5));
+      board[coordinatesToBoardIndex(1,6)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(1,6));
+      board[coordinatesToBoardIndex(1,7)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(1,7));
+      board[coordinatesToBoardIndex(2,0)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(2,0));
+      board[coordinatesToBoardIndex(2,1)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(2,1));
+      board[coordinatesToBoardIndex(2,2)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(2,2));
+      board[coordinatesToBoardIndex(2,3)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(2,3));
+      board[coordinatesToBoardIndex(2,4)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(2,4));
+      board[coordinatesToBoardIndex(2,5)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(2,5));
+      board[coordinatesToBoardIndex(2,7)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(2,7));
+      board[coordinatesToBoardIndex(3,0)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(3,3));
+      board[coordinatesToBoardIndex(3,2)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(3,2));
+      board[coordinatesToBoardIndex(3,3)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(3,3));
+      board[coordinatesToBoardIndex(3,4)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(3,4));
+      board[coordinatesToBoardIndex(3,5)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(3,5));
+      board[coordinatesToBoardIndex(3,7)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(3,7));
+      board[coordinatesToBoardIndex(4,0)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(4,0));
+      board[coordinatesToBoardIndex(4,2)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(4,2));
+      board[coordinatesToBoardIndex(4,3)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(4,3));
+      board[coordinatesToBoardIndex(4,4)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(4,4));
+      board[coordinatesToBoardIndex(4,5)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(4,5));
+      board[coordinatesToBoardIndex(4,7)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(4,7));
+      board[coordinatesToBoardIndex(5,0)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(5,0));
+      board[coordinatesToBoardIndex(5,2)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(5,2));
+      board[coordinatesToBoardIndex(5,3)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(5,3));
+      board[coordinatesToBoardIndex(5,4)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(5,4));
+      board[coordinatesToBoardIndex(5,5)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(5,5));
+      board[coordinatesToBoardIndex(5,6)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(5,6));
+      board[coordinatesToBoardIndex(5,7)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(5,7));
+      board[coordinatesToBoardIndex(6,0)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(6,0));
+      board[coordinatesToBoardIndex(6,1)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(6,1));
+      board[coordinatesToBoardIndex(6,2)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(6,2));
+      board[coordinatesToBoardIndex(6,3)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(6,3));
+      board[coordinatesToBoardIndex(6,4)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(6,4));
+      board[coordinatesToBoardIndex(6,5)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(6,5));
+      board[coordinatesToBoardIndex(6,7)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(6,7));
+      board[coordinatesToBoardIndex(7,1)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(7,1));
+      board[coordinatesToBoardIndex(7,2)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(7,2));
+      board[coordinatesToBoardIndex(7,3)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(7,3));
+      board[coordinatesToBoardIndex(7,4)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(7,4));
+      board[coordinatesToBoardIndex(7,5)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(7,5));
+
 
       p1King = board[coordinatesToBoardIndex(0,0)];
       p2King = board[coordinatesToBoardIndex(7,7)];
 
-      // Pieces are also kept in an array for faster access
-      std::vector<Piece> p1Pieces{NUM_STARTING_PIECES};
+      // Piece pointers are also kept in an array for faster access
+      std::vector<Piece*> p1Pieces{NUM_STARTING_PIECES};
       p1Pieces[0] = board[coordinatesToBoardIndex(0,0)];
       p1Pieces[1] = board[coordinatesToBoardIndex(0,1)];
       p1Pieces[2] = board[coordinatesToBoardIndex(1,1)];
@@ -320,7 +372,7 @@ class Game {
       p1Pieces[6] = board[coordinatesToBoardIndex(5,1)];
       playerToPieces[Player::PLAYER_1] = p1Pieces;
 
-      std::vector<Piece> p2Pieces{NUM_STARTING_PIECES};
+      std::vector<Piece*> p2Pieces{NUM_STARTING_PIECES};
       p2Pieces[0] = board[coordinatesToBoardIndex(7,7)];
       p2Pieces[1] = board[coordinatesToBoardIndex(7,6)];
       p2Pieces[2] = board[coordinatesToBoardIndex(6,6)];
@@ -337,109 +389,109 @@ class Game {
     void makeMoveAndAbility(int moveSrcIdx, int moveDstIdx, int abilitySrcIdx, int abilityDstIdx, std::vector<std::vector<int>> squareToNeighboringSquares) {
       if(moveSrcIdx != MOVE_SKIP) {
         board[moveDstIdx] = board[moveSrcIdx];
-        board[moveDstIdx].squareIndex = moveDstIdx;
-        board[moveSrcIdx] = Piece(PieceType::NO_PIECE, 0, 0);
+        board[moveDstIdx]->squareIndex = moveDstIdx;
+        board[moveSrcIdx] = new Piece(PieceType::NO_PIECE, 0, moveSrcIdx);
       }
       if(abilitySrcIdx != ABILITY_SKIP) {
-        Piece abilitySrcPiece = board[abilitySrcIdx];
-        Piece abilityDstPiece = board[abilityDstIdx];
-        Piece neighboringPiece;
+        Piece* abilitySrcPiece = board[abilitySrcIdx];
+        Piece* abilityDstPiece = board[abilityDstIdx];
+        Piece* neighboringPiece;
         int neighboringSquare;
-        switch(abilitySrcPiece.type) {
+        switch(abilitySrcPiece->type) {
           // king does single target damage
           case P1_KING:
-            abilityDstPiece.healthPoints -= KING_ABILITY_POINTS;
-            if(abilityDstPiece.healthPoints <= 0) {
-              board[abilityDstIdx] = Piece(PieceType::NO_PIECE, 0, 0);
+            abilityDstPiece->healthPoints -= KING_ABILITY_POINTS;
+            if(abilityDstPiece->healthPoints <= 0) {
+              board[abilityDstIdx] = new Piece(PieceType::NO_PIECE, 0, abilityDstIdx);
             }
             break;
           // mage damages attacked piece and all enemy pieces that are touching it
           case P1_MAGE:
-            abilityDstPiece.healthPoints -= MAGE_ABILITY_POINTS;
-            if(abilityDstPiece.healthPoints <= 0) {
-              board[abilityDstIdx] = Piece(PieceType::NO_PIECE, 0, 0);
+            abilityDstPiece->healthPoints -= MAGE_ABILITY_POINTS;
+            if(abilityDstPiece->healthPoints <= 0) {
+              board[abilityDstIdx] = new Piece(PieceType::NO_PIECE, 0, abilityDstIdx);
             }
             for(int i = 0; i < squareToNeighboringSquares[abilityDstIdx].size(); i++) {
               neighboringSquare = squareToNeighboringSquares[abilityDstIdx][i];
               neighboringPiece = board[neighboringSquare];
-              if(player1OrEmpty(neighboringPiece.type)) continue;  // don't damage your own pieces
-              neighboringPiece.healthPoints -= MAGE_ABILITY_POINTS;
-              if(neighboringPiece.healthPoints <= 0) {
-                board[neighboringSquare] = Piece(NO_PIECE, 0, 0);
+              if(player1OrEmpty(neighboringPiece->type)) continue;  // don't damage your own pieces
+              neighboringPiece->healthPoints -= MAGE_ABILITY_POINTS;
+              if(neighboringPiece->healthPoints <= 0) {
+                board[neighboringSquare] = new Piece(NO_PIECE, 0, neighboringSquare);
               }
             }
             break;
           case P1_PAWN:
-            if(abilityDstPiece.type == P1_WALL || abilityDstPiece.type == P2_WALL) {
-              board[abilityDstIdx] = Piece(NO_PIECE, 0, 0); // destroy wall
-            } else if(abilityDstPiece.type == NO_PIECE) {
-                board[abilityDstIdx] = Piece(P1_WALL, WALL_STARTING_HEALTH_POINTS, abilityDstIdx); // make wall
+            if(abilityDstPiece->type == P1_WALL || abilityDstPiece->type == P2_WALL) {
+              board[abilityDstIdx] = new Piece(NO_PIECE, 0, abilityDstIdx); // destroy wall
+            } else if(abilityDstPiece->type == NO_PIECE) {
+                board[abilityDstIdx] = new Piece(P1_WALL, WALL_STARTING_HEALTH_POINTS, abilityDstIdx); // make wall
             } else {
-              abilityDstPiece.healthPoints -= PAWN_ABILITY_POINTS; // damage piece
-              if(abilityDstPiece.healthPoints <= 0) {
-                board[abilityDstIdx] = Piece(PieceType::NO_PIECE, 0, 0);
+              abilityDstPiece->healthPoints -= PAWN_ABILITY_POINTS; // damage piece
+              if(abilityDstPiece->healthPoints <= 0) {
+                board[abilityDstIdx] = new Piece(PieceType::NO_PIECE, 0, abilityDstIdx);
               }
             }
             break;
           case P1_WARRIOR:
-            abilityDstPiece.healthPoints -= WARRIOR_ABILITY_POINTS;
-            if(abilityDstPiece.healthPoints <= 0) {
-              board[abilityDstIdx] = Piece(PieceType::NO_PIECE, 0, 0);
+            abilityDstPiece->healthPoints -= WARRIOR_ABILITY_POINTS;
+            if(abilityDstPiece->healthPoints <= 0) {
+              board[abilityDstIdx] = new Piece(PieceType::NO_PIECE, 0, abilityDstIdx);
             }
             break;
           case P1_WALL:
             break;
           case P1_ASSASSIN:
-            abilityDstPiece.healthPoints -= ASSASSIN_ABILITY_POINTS;
-            if(abilityDstPiece.healthPoints <= 0) {
-              board[abilityDstIdx] = Piece(PieceType::NO_PIECE, 0, 0);
+            abilityDstPiece->healthPoints -= ASSASSIN_ABILITY_POINTS;
+            if(abilityDstPiece->healthPoints <= 0) {
+              board[abilityDstIdx] = new Piece(PieceType::NO_PIECE, 0, abilityDstIdx);
             }
             break;
           case P2_KING:
-            abilityDstPiece.healthPoints -= KING_ABILITY_POINTS;
-            if(abilityDstPiece.healthPoints <= 0) {
-              board[abilityDstIdx] = Piece(PieceType::NO_PIECE, 0, 0);
+            abilityDstPiece->healthPoints -= KING_ABILITY_POINTS;
+            if(abilityDstPiece->healthPoints <= 0) {
+              board[abilityDstIdx] = new Piece(PieceType::NO_PIECE, 0, abilityDstIdx);
             }
             break;
           case P2_MAGE:
-            abilityDstPiece.healthPoints -= MAGE_ABILITY_POINTS;
-            if(abilityDstPiece.healthPoints <= 0) {
-              board[abilityDstIdx] = Piece(PieceType::NO_PIECE, 0, 0);
+            abilityDstPiece->healthPoints -= MAGE_ABILITY_POINTS;
+            if(abilityDstPiece->healthPoints <= 0) {
+              board[abilityDstIdx] = new Piece(PieceType::NO_PIECE, 0, abilityDstIdx);
             }
             for(int i = 0; i < squareToNeighboringSquares[abilityDstIdx].size(); i++) {
               neighboringSquare = squareToNeighboringSquares[abilityDstIdx][i];
               neighboringPiece = board[neighboringSquare];
-              if(player2OrEmpty(neighboringPiece.type)) continue;  // don't damage your own pieces
-              neighboringPiece.healthPoints -= MAGE_ABILITY_POINTS;
-              if(neighboringPiece.healthPoints <= 0) {
-                board[neighboringSquare] = Piece(NO_PIECE, 0, 0);
+              if(player2OrEmpty(neighboringPiece->type)) continue;  // don't damage your own pieces
+              neighboringPiece->healthPoints -= MAGE_ABILITY_POINTS;
+              if(neighboringPiece->healthPoints <= 0) {
+                board[neighboringSquare] = new Piece(NO_PIECE, 0, neighboringSquare);
               }
             }
             break;
           case P2_PAWN:
-            if(abilityDstPiece.type == P1_WALL || abilityDstPiece.type == P2_WALL) {
-              board[abilityDstIdx] = Piece(NO_PIECE, 0, 0); // destroy wall
-            } else if(abilityDstPiece.type == NO_PIECE) {
-                board[abilityDstIdx] = Piece(P2_WALL, WALL_STARTING_HEALTH_POINTS, abilityDstIdx); // make wall
+            if(abilityDstPiece->type == P1_WALL || abilityDstPiece->type == P2_WALL) {
+              board[abilityDstIdx] = new Piece(NO_PIECE, 0, abilityDstIdx); // destroy wall
+            } else if(abilityDstPiece->type == NO_PIECE) {
+                board[abilityDstIdx] = new Piece(P2_WALL, WALL_STARTING_HEALTH_POINTS, abilityDstIdx); // make wall
             } else {
-              abilityDstPiece.healthPoints -= PAWN_ABILITY_POINTS; // damage piece
-              if(abilityDstPiece.healthPoints <= 0) {
-                board[abilityDstIdx] = Piece(PieceType::NO_PIECE, 0, 0);
+              abilityDstPiece->healthPoints -= PAWN_ABILITY_POINTS; // damage piece
+              if(abilityDstPiece->healthPoints <= 0) {
+                board[abilityDstIdx] = new Piece(PieceType::NO_PIECE, 0, abilityDstIdx);
               }
             }
             break;
           case P2_WARRIOR:
-            abilityDstPiece.healthPoints -= WARRIOR_ABILITY_POINTS;
-            if(abilityDstPiece.healthPoints <= 0) {
-              board[abilityDstIdx] = Piece(PieceType::NO_PIECE, 0, 0);
+            abilityDstPiece->healthPoints -= WARRIOR_ABILITY_POINTS;
+            if(abilityDstPiece->healthPoints <= 0) {
+              board[abilityDstIdx] = new Piece(PieceType::NO_PIECE, 0, abilityDstIdx);
             }
             break;
           case P2_WALL:
             break;
           case P2_ASSASSIN:
-            abilityDstPiece.healthPoints -= ASSASSIN_ABILITY_POINTS;
-            if(abilityDstPiece.healthPoints <= 0) {
-              board[abilityDstIdx] = Piece(PieceType::NO_PIECE, 0, 0);
+            abilityDstPiece->healthPoints -= ASSASSIN_ABILITY_POINTS;
+            if(abilityDstPiece->healthPoints <= 0) {
+              board[abilityDstIdx] = new Piece(PieceType::NO_PIECE, 0, abilityDstIdx);
             }
             break;
         }
@@ -453,7 +505,7 @@ class Game {
       for(int i = NUM_ROWS-1; i >= 0; i--) {
         std::cout << i << " ";
         for(int j = 0; j < NUM_COLUMNS; j++) {
-          std::cout << std::string(board[coordinatesToBoardIndex(j, i)]) << " ";
+          std::cout << std::string(*board[coordinatesToBoardIndex(j, i)]) << " ";
         }
         std::cout << "\n";
       } 
@@ -466,8 +518,8 @@ class Game {
 
     void makeMove(int moveSrcIdx, int moveDstIdx) {
       board[moveDstIdx] = board[moveSrcIdx];
-      board[moveDstIdx].squareIndex = moveDstIdx;
-      board[moveSrcIdx] = Piece(PieceType::NO_PIECE, 0, 0);
+      board[moveDstIdx]->squareIndex = moveDstIdx;
+      board[moveSrcIdx] = new Piece(PieceType::NO_PIECE, 0, moveSrcIdx);
       return;
     }
 
@@ -476,8 +528,8 @@ class Game {
      */
     void undoMove(int originalMoveSrcIdx, int originalMoveDstIdx) {
       board[originalMoveSrcIdx] = board[originalMoveDstIdx];
-      board[originalMoveSrcIdx].squareIndex = originalMoveSrcIdx;
-      board[originalMoveDstIdx] = Piece(PieceType::NO_PIECE, 0, 0);
+      board[originalMoveSrcIdx]->squareIndex = originalMoveSrcIdx;
+      board[originalMoveDstIdx] = new Piece(PieceType::NO_PIECE, 0, 0);
       return;
     }
 
@@ -489,25 +541,25 @@ class Game {
       // TODO: can (probably) be optimized by calculating legal abilities first and then modifying
       // them depending on the move
       for(int i = 0; i < NUM_STARTING_PIECES; i++) {
-        Piece currentPiece = playerToPieces[currentPlayer][i];
-        if(currentPiece.healthPoints <= 0) continue; // dead pieces don't move
+        Piece* currentPiece = playerToPieces[currentPlayer][i];
+        if(currentPiece->healthPoints <= 0) continue; // dead pieces don't move
 
-        auto legalMoves = pieceTypeToSquareIndexToLegalMoves[currentPiece.type][currentPiece.squareIndex];
+        auto legalMoves = pieceTypeToSquareIndexToLegalMoves[currentPiece->type][currentPiece->squareIndex];
         for(int j = 0; j < legalMoves.size(); j++) {
-          if(board[legalMoves[j].moveDstIdx].type != NO_PIECE) continue;
+          if(board[legalMoves[j].moveDstIdx]->type != NO_PIECE) continue;
           makeMove(legalMoves[j].moveSrcIdx, legalMoves[j].moveDstIdx);
           for(int k = 0; k < NUM_STARTING_PIECES; k++) {
-            Piece cp2 = playerToPieces[currentPlayer][k];
-            auto legalAbilities = pieceTypeToSquareIndexToLegalAbilities[cp2.type][cp2.squareIndex];
+            Piece* cp2 = playerToPieces[currentPlayer][k];
+            auto legalAbilities = pieceTypeToSquareIndexToLegalAbilities[cp2->type][cp2->squareIndex];
             for(int l = 0; l < legalAbilities.size(); l++) {
               PlayerAbility currentAbility = legalAbilities[l];
-              Piece destinationSquarePiece = board[currentAbility.abilityDstIdx];
+              Piece* destinationSquarePiece = board[currentAbility.abilityDstIdx];
               // exclude useless abilities, e.g. warrior attacking empty square
-              switch(cp2.type) {
+              switch(cp2->type) {
                 // king can only use abilities on enemy pieces
                 case P1_KING:
-                  switch(destinationSquarePiece.type) {
-                    case P1_KING: // should never happen
+                  switch(destinationSquarePiece->type) {
+                    case P1_KING:
                       continue;
                     case P1_MAGE:
                       continue;
@@ -538,7 +590,7 @@ class Game {
                   }
                 // mage can only use abilities on enemy pieces
                 case P1_MAGE:
-                  switch(destinationSquarePiece.type) {
+                  switch(destinationSquarePiece->type) {
                     case P1_KING:
                       continue;
                     case P1_MAGE:
@@ -571,7 +623,7 @@ class Game {
                   break;
                 // pawn can use abilities on enemy pieces, on allied walls and on empty squares
                 case P1_PAWN:
-                  switch(destinationSquarePiece.type) {
+                  switch(destinationSquarePiece->type) {
                     case P1_KING:
                       continue;
                     case P1_MAGE:
@@ -604,7 +656,7 @@ class Game {
                   break;
                 // warrior can only use abilities on enemy pieces
                 case P1_WARRIOR:
-                  switch(destinationSquarePiece.type) {
+                  switch(destinationSquarePiece->type) {
                     case P1_KING:
                       continue;
                     case P1_MAGE:
@@ -640,7 +692,7 @@ class Game {
                   break;
                 // assassin can only use abilities on enemy pieces
                 case P1_ASSASSIN:
-                  switch(destinationSquarePiece.type) {
+                  switch(destinationSquarePiece->type) {
                     case P1_KING:
                       continue;
                     case P1_MAGE:
@@ -674,7 +726,7 @@ class Game {
 
                 // king can only use abilities on enemy pieces
                 case P2_KING:
-                  switch(destinationSquarePiece.type) {
+                  switch(destinationSquarePiece->type) {
                     case P1_KING:
                       break;
                     case P1_MAGE:
@@ -687,7 +739,7 @@ class Game {
                       break;
                     case P1_ASSASSIN:
                       break;
-                    case P2_KING: // should never happen
+                    case P2_KING:
                       continue;
                     case P2_MAGE:
                       continue;
@@ -706,7 +758,7 @@ class Game {
                   }
                 // mage can only use abilities on enemy pieces
                 case P2_MAGE:
-                  switch(destinationSquarePiece.type) {
+                  switch(destinationSquarePiece->type) {
                     case P1_KING:
                       break;
                     case P1_MAGE:
@@ -739,7 +791,7 @@ class Game {
                   break;
                 // pawn can use abilities on enemy pieces, on allied walls and on empty squares
                 case P2_PAWN:
-                  switch(destinationSquarePiece.type) {
+                  switch(destinationSquarePiece->type) {
                     case P1_KING:
                       break;
                     case P1_MAGE:
@@ -772,7 +824,7 @@ class Game {
                   break;
                 // warrior can only use abilities on enemy pieces
                 case P2_WARRIOR:
-                  switch(destinationSquarePiece.type) {
+                  switch(destinationSquarePiece->type) {
                     case P1_KING:
                       break;
                     case P1_MAGE:
@@ -808,7 +860,7 @@ class Game {
                   break;
                 // assassin can only use abilities on enemy pieces
                 case P2_ASSASSIN:
-                  switch(destinationSquarePiece.type) {
+                  switch(destinationSquarePiece->type) {
                     case P1_KING:
                       break;
                     case P1_MAGE:
@@ -857,16 +909,16 @@ class Game {
       }
       // player can skip the move
       for(int k = 0; k < NUM_STARTING_PIECES; k++) {
-        Piece cp2 = playerToPieces[currentPlayer][k];
-        auto legalAbilities = pieceTypeToSquareIndexToLegalAbilities[cp2.type][cp2.squareIndex];
+        Piece* cp2 = playerToPieces[currentPlayer][k];
+        auto legalAbilities = pieceTypeToSquareIndexToLegalAbilities[cp2->type][cp2->squareIndex];
         for(int l = 0; l < legalAbilities.size(); l++) {
-          Piece destinationSquarePiece = board[legalAbilities[l].abilityDstIdx];
+          Piece* destinationSquarePiece = board[legalAbilities[l].abilityDstIdx];
           // exclude useless abilities
-          switch(cp2.type) {
+          switch(cp2->type) {
             // king can only use abilities on enemy pieces
             case P1_KING:
-              switch(destinationSquarePiece.type) {
-                case P1_KING: // should never happen
+              switch(destinationSquarePiece->type) {
+                case P1_KING:
                   continue;
                 case P1_MAGE:
                   continue;
@@ -897,7 +949,7 @@ class Game {
               }
             // mage can only use abilities on enemy pieces
             case P1_MAGE:
-              switch(destinationSquarePiece.type) {
+              switch(destinationSquarePiece->type) {
                 case P1_KING:
                   continue;
                 case P1_MAGE:
@@ -930,7 +982,7 @@ class Game {
               break;
             // pawn can use abilities on enemy pieces, on allied walls and on empty squares
             case P1_PAWN:
-              switch(destinationSquarePiece.type) {
+              switch(destinationSquarePiece->type) {
                 case P1_KING:
                   continue;
                 case P1_MAGE:
@@ -963,7 +1015,7 @@ class Game {
               break;
             // warrior can only use abilities on enemy pieces
             case P1_WARRIOR:
-              switch(destinationSquarePiece.type) {
+              switch(destinationSquarePiece->type) {
                 case P1_KING:
                   continue;
                 case P1_MAGE:
@@ -999,7 +1051,7 @@ class Game {
               break;
             // assassin can only use abilities on enemy pieces
             case P1_ASSASSIN:
-              switch(destinationSquarePiece.type) {
+              switch(destinationSquarePiece->type) {
                 case P1_KING:
                   continue;
                 case P1_MAGE:
@@ -1033,7 +1085,7 @@ class Game {
 
             // king can only use abilities on enemy pieces
             case P2_KING:
-              switch(destinationSquarePiece.type) {
+              switch(destinationSquarePiece->type) {
                 case P1_KING:
                   break;
                 case P1_MAGE:
@@ -1046,7 +1098,7 @@ class Game {
                   break;
                 case P1_ASSASSIN:
                   break;
-                case P2_KING: // should never happen
+                case P2_KING:
                   continue;
                 case P2_MAGE:
                   continue;
@@ -1065,7 +1117,7 @@ class Game {
               }
             // mage can only use abilities on enemy pieces
             case P2_MAGE:
-              switch(destinationSquarePiece.type) {
+              switch(destinationSquarePiece->type) {
                 case P1_KING:
                   break;
                 case P1_MAGE:
@@ -1098,7 +1150,7 @@ class Game {
               break;
             // pawn can use abilities on enemy pieces, on allied walls and on empty squares
             case P2_PAWN:
-              switch(destinationSquarePiece.type) {
+              switch(destinationSquarePiece->type) {
                 case P1_KING:
                   break;
                 case P1_MAGE:
@@ -1131,7 +1183,7 @@ class Game {
               break;
             // warrior can only use abilities on enemy pieces
             case P2_WARRIOR:
-              switch(destinationSquarePiece.type) {
+              switch(destinationSquarePiece->type) {
                 case P1_KING:
                   break;
                 case P1_MAGE:
@@ -1167,7 +1219,7 @@ class Game {
               break;
             // assassin can only use abilities on enemy pieces
             case P2_ASSASSIN:
-              switch(destinationSquarePiece.type) {
+              switch(destinationSquarePiece->type) {
                 case P1_KING:
                   break;
                 case P1_MAGE:
@@ -1874,10 +1926,24 @@ int main() {
     std::cout << "Enter ability's destination y coordinate:";
     std::cin >> y4;
 
-    int moveSrcIdx = coordinatesToBoardIndex(x1, y1);
-    int moveDstIdx = coordinatesToBoardIndex(x2, y2);
-    int abilitySrcIdx = coordinatesToBoardIndex(x3, y3);
-    int abilityDstIdx = coordinatesToBoardIndex(x4, y4);
+    int moveSrcIdx;
+    int moveDstIdx;
+    int abilitySrcIdx;
+    int abilityDstIdx;
+    if(x1 == MOVE_SKIP || x2 == MOVE_SKIP || y1 == MOVE_SKIP || y2 == MOVE_SKIP) {
+      moveSrcIdx = MOVE_SKIP;
+      moveDstIdx = MOVE_SKIP;
+    } else {
+      moveSrcIdx = coordinatesToBoardIndex(x1, y1);
+      moveDstIdx = coordinatesToBoardIndex(x2, y2);
+    }
+    if(x3 == ABILITY_SKIP || x4 == ABILITY_SKIP || y3 == ABILITY_SKIP || y4 == ABILITY_SKIP) {
+      abilitySrcIdx = ABILITY_SKIP;
+      abilityDstIdx = ABILITY_SKIP;
+    } else {
+      abilitySrcIdx = coordinatesToBoardIndex(x3, y3);
+      abilityDstIdx = coordinatesToBoardIndex(x4, y4);
+    }
     g.makeMoveAndAbility(moveSrcIdx, moveDstIdx, abilitySrcIdx, abilityDstIdx, stns);
     std::cout << "--------------------\n";
   }
