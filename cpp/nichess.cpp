@@ -2010,6 +2010,34 @@ std::vector<std::vector<int>> generateSquareToNeighboringSquares() {
   return squareToNeighboringSquares;
 }
 
+/* 
+ * performance test - https://www.chessprogramming.org/Perft
+ * with bulk counting
+ */
+unsigned long long perft(Game& game, int depth,
+        std::vector<std::vector<std::vector<PlayerMove>>>& pieceTypeToSquareIndexToLegalMoves,
+        std::vector<std::vector<std::vector<PlayerAbility>>>& pieceTypeToSquareIndexToLegalAbilities,
+        std::vector<std::vector<int>>& squareToNeighboringSquares
+    ) {
+  std::vector<PlayerAction> legalActions;
+  unsigned long long nodes = 0;
+  legalActions = game.legalActions(pieceTypeToSquareIndexToLegalMoves, pieceTypeToSquareIndexToLegalAbilities);
+  int numLegalActions = legalActions.size();
+  if(depth == 1) {
+    return (unsigned long long) numLegalActions;
+  }
+  for(int i = 0; i < numLegalActions; i++) {
+    if(depth == 3)
+      std::cout << i << " / " << numLegalActions <<  "\n";
+    PlayerAction pa = legalActions[i];
+    game.makeMoveAndAbility(pa.moveSrcIdx, pa.moveDstIdx, pa.abilitySrcIdx, pa.abilityDstIdx, squareToNeighboringSquares);
+    nodes += perft(game, depth-1, pieceTypeToSquareIndexToLegalMoves, pieceTypeToSquareIndexToLegalAbilities, squareToNeighboringSquares);
+    game.undoLastMoveAndAbility();
+  }
+
+  return nodes;
+}
+
 
 
 
@@ -2018,15 +2046,17 @@ int main() {
   auto pttstlm = generateLegalMovesOnAnEmptyBoard();
   auto pttstla = generateLegalAbilitiesOnAnEmptyBoard();
   auto stns = generateSquareToNeighboringSquares();
+
+  std::cout << "Calculating number of nodes at depth 3\n";
+  unsigned long long nodes = perft(g, 3, pttstlm, pttstla, stns);
+  std::cout << "Total number of nodes at depth 3: " << nodes << "\n";
+  
+
+  /*
   std::vector<PlayerAction> legalActions;
   while(true) {
     legalActions = g.legalActions(pttstlm, pttstla);
-    /*
-    for(int i = 0; i < legalActions.size(); i++) {
-      legalActions[i].print();
-    }
-    */
-    //std::cout << "Total number of legal actions: " << legalActions.size() << "\n";
+     //std::cout << "Total number of legal actions: " << legalActions.size() << "\n";
     g.print();
     if(g.getCurrentPlayer() == PLAYER_1) {
       std::cout << "Player to move: PLAYER_1 (upper-case letters)\n";
@@ -2079,5 +2109,6 @@ int main() {
     }
     std::cout << "--------------------\n";
   }
+  */
   return 0;
 }
