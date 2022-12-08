@@ -14,7 +14,7 @@ const int MOVE_SKIP = -1;
 const int KING_STARTING_HEALTH_POINTS = 200;
 const int MAGE_STARTING_HEALTH_POINTS = 230;
 const int PAWN_STARTING_HEALTH_POINTS = 300;
-const int WARRIOR_STARTING_HEALTH_POINTS = 200;
+const int WARRIOR_STARTING_HEALTH_POINTS = 500;
 const int ASSASSIN_STARTING_HEALTH_POINTS = 110;
 const int WALL_STARTING_HEALTH_POINTS = 100;
 
@@ -279,15 +279,42 @@ class Piece {
 
 };
 
+enum AbilityType: int {
+  KING_DAMAGE, MAGE_DAMAGE, WARRIOR_DAMAGE, ASSASSIN_DAMAGE, PAWN_DAMAGE, PAWN_MAKE_WALL, PAWN_DESTROY_WALL, NO_ABILITY
+};
+
+class UndoInfo {
+  public:
+    Piece* affectedPieces[9];
+    int moveSrcIdx, moveDstIdx;
+    AbilityType abilityType;
+    UndoInfo() {
+      for(int i = 0; i < 9; i++) {
+        this->affectedPieces[i] = nullptr;
+      }
+    }
+    UndoInfo(int moveSrcIdx, int moveDstIdx, AbilityType abilityType) {
+      this->moveSrcIdx = moveSrcIdx;
+      this->moveDstIdx = moveDstIdx;
+      this->abilityType = abilityType;
+      for(int i = 0; i < 9; i++) {
+        this->affectedPieces[i] = nullptr;
+      }
+    }
+};
+
 class Game {
   private: 
     Piece* board[64];
-    Piece* p2King;
     Piece* p1King;
+    Piece* p2King;
     std::vector<std::vector<Piece*>> playerToPieces{NUM_PLAYERS};
     Player currentPlayer;
+    UndoInfo moveNumberToUndoInfo[300]; // TODO: Game can go on forever. Maybe use vector and resize?
+    int moveNumber;
   public:
     Game() {
+      moveNumber = 0;
       currentPlayer = Player::PLAYER_1;
       // Create starting position
       board[coordinatesToBoardIndex(0,0)] = new Piece(PieceType::P1_KING, KING_STARTING_HEALTH_POINTS, coordinatesToBoardIndex(0,0));
@@ -387,6 +414,9 @@ class Game {
      * Assumes that the move and ability are legal.
      */
     void makeMoveAndAbility(int moveSrcIdx, int moveDstIdx, int abilitySrcIdx, int abilityDstIdx, std::vector<std::vector<int>> squareToNeighboringSquares) {
+      UndoInfo undoInfo = UndoInfo();
+      undoInfo.moveSrcIdx = moveSrcIdx;
+      undoInfo.moveDstIdx = moveDstIdx;
       if(moveSrcIdx != MOVE_SKIP) {
         board[moveDstIdx] = board[moveSrcIdx];
         board[moveDstIdx]->squareIndex = moveDstIdx;
@@ -401,6 +431,8 @@ class Game {
           // king does single target damage
           case P1_KING:
             abilityDstPiece->healthPoints -= KING_ABILITY_POINTS;
+            undoInfo.abilityType = AbilityType::KING_DAMAGE;
+            undoInfo.affectedPieces[0] = abilityDstPiece;
             if(abilityDstPiece->healthPoints <= 0) {
               board[abilityDstIdx] = new Piece(PieceType::NO_PIECE, 0, abilityDstIdx);
             }
@@ -408,6 +440,8 @@ class Game {
           // mage damages attacked piece and all enemy pieces that are touching it
           case P1_MAGE:
             abilityDstPiece->healthPoints -= MAGE_ABILITY_POINTS;
+            undoInfo.abilityType = AbilityType::MAGE_DAMAGE;
+            undoInfo.affectedPieces[0] = abilityDstPiece;
             if(abilityDstPiece->healthPoints <= 0) {
               board[abilityDstIdx] = new Piece(PieceType::NO_PIECE, 0, abilityDstIdx);
             }
@@ -416,6 +450,8 @@ class Game {
               neighboringPiece = board[neighboringSquare];
               if(player1OrEmpty(neighboringPiece->type)) continue;  // don't damage your own pieces
               neighboringPiece->healthPoints -= MAGE_ABILITY_POINTS;
+              // i+1 because 0 is for abilityDstPiece
+              undoInfo.affectedPieces[i+1] = neighboringPiece;
               if(neighboringPiece->healthPoints <= 0) {
                 board[neighboringSquare] = new Piece(NO_PIECE, 0, neighboringSquare);
               }
@@ -423,11 +459,17 @@ class Game {
             break;
           case P1_PAWN:
             if(abilityDstPiece->type == P1_WALL || abilityDstPiece->type == P2_WALL) {
+              undoInfo.abilityType = AbilityType::PAWN_DESTROY_WALL;
+              undoInfo.affectedPieces[0] = abilityDstPiece;
               board[abilityDstIdx] = new Piece(NO_PIECE, 0, abilityDstIdx); // destroy wall
             } else if(abilityDstPiece->type == NO_PIECE) {
-                board[abilityDstIdx] = new Piece(P1_WALL, WALL_STARTING_HEALTH_POINTS, abilityDstIdx); // make wall
+              undoInfo.abilityType = AbilityType::PAWN_MAKE_WALL;
+              undoInfo.affectedPieces[0] = abilityDstPiece;
+              board[abilityDstIdx] = new Piece(P1_WALL, WALL_STARTING_HEALTH_POINTS, abilityDstIdx); // make wall
             } else {
               abilityDstPiece->healthPoints -= PAWN_ABILITY_POINTS; // damage piece
+              undoInfo.abilityType = AbilityType::PAWN_DAMAGE;
+              undoInfo.affectedPieces[0] = abilityDstPiece;
               if(abilityDstPiece->healthPoints <= 0) {
                 board[abilityDstIdx] = new Piece(PieceType::NO_PIECE, 0, abilityDstIdx);
               }
@@ -435,6 +477,8 @@ class Game {
             break;
           case P1_WARRIOR:
             abilityDstPiece->healthPoints -= WARRIOR_ABILITY_POINTS;
+            undoInfo.abilityType = AbilityType::WARRIOR_DAMAGE;
+            undoInfo.affectedPieces[0] = abilityDstPiece;
             if(abilityDstPiece->healthPoints <= 0) {
               board[abilityDstIdx] = new Piece(PieceType::NO_PIECE, 0, abilityDstIdx);
             }
@@ -443,18 +487,24 @@ class Game {
             break;
           case P1_ASSASSIN:
             abilityDstPiece->healthPoints -= ASSASSIN_ABILITY_POINTS;
+            undoInfo.abilityType = AbilityType::ASSASSIN_DAMAGE;
+            undoInfo.affectedPieces[0] = abilityDstPiece;
             if(abilityDstPiece->healthPoints <= 0) {
               board[abilityDstIdx] = new Piece(PieceType::NO_PIECE, 0, abilityDstIdx);
             }
             break;
           case P2_KING:
             abilityDstPiece->healthPoints -= KING_ABILITY_POINTS;
+            undoInfo.abilityType = AbilityType::KING_DAMAGE;
+            undoInfo.affectedPieces[0] = abilityDstPiece;
             if(abilityDstPiece->healthPoints <= 0) {
               board[abilityDstIdx] = new Piece(PieceType::NO_PIECE, 0, abilityDstIdx);
             }
             break;
           case P2_MAGE:
             abilityDstPiece->healthPoints -= MAGE_ABILITY_POINTS;
+            undoInfo.abilityType = AbilityType::MAGE_DAMAGE;
+            undoInfo.affectedPieces[0] = abilityDstPiece;
             if(abilityDstPiece->healthPoints <= 0) {
               board[abilityDstIdx] = new Piece(PieceType::NO_PIECE, 0, abilityDstIdx);
             }
@@ -463,6 +513,8 @@ class Game {
               neighboringPiece = board[neighboringSquare];
               if(player2OrEmpty(neighboringPiece->type)) continue;  // don't damage your own pieces
               neighboringPiece->healthPoints -= MAGE_ABILITY_POINTS;
+              // i+1 because 0 is for abilityDstPiece
+              undoInfo.affectedPieces[i+1] = neighboringPiece;
               if(neighboringPiece->healthPoints <= 0) {
                 board[neighboringSquare] = new Piece(NO_PIECE, 0, neighboringSquare);
               }
@@ -470,11 +522,17 @@ class Game {
             break;
           case P2_PAWN:
             if(abilityDstPiece->type == P1_WALL || abilityDstPiece->type == P2_WALL) {
+              undoInfo.abilityType = AbilityType::PAWN_DESTROY_WALL;
+              undoInfo.affectedPieces[0] = abilityDstPiece;
               board[abilityDstIdx] = new Piece(NO_PIECE, 0, abilityDstIdx); // destroy wall
             } else if(abilityDstPiece->type == NO_PIECE) {
-                board[abilityDstIdx] = new Piece(P2_WALL, WALL_STARTING_HEALTH_POINTS, abilityDstIdx); // make wall
+              undoInfo.abilityType = AbilityType::PAWN_MAKE_WALL;
+              undoInfo.affectedPieces[0] = abilityDstPiece;
+              board[abilityDstIdx] = new Piece(P2_WALL, WALL_STARTING_HEALTH_POINTS, abilityDstIdx); // make wall
             } else {
               abilityDstPiece->healthPoints -= PAWN_ABILITY_POINTS; // damage piece
+              undoInfo.abilityType = AbilityType::PAWN_DAMAGE;
+              undoInfo.affectedPieces[0] = abilityDstPiece;
               if(abilityDstPiece->healthPoints <= 0) {
                 board[abilityDstIdx] = new Piece(PieceType::NO_PIECE, 0, abilityDstIdx);
               }
@@ -482,6 +540,8 @@ class Game {
             break;
           case P2_WARRIOR:
             abilityDstPiece->healthPoints -= WARRIOR_ABILITY_POINTS;
+            undoInfo.abilityType = AbilityType::WARRIOR_DAMAGE;
+            undoInfo.affectedPieces[0] = abilityDstPiece;
             if(abilityDstPiece->healthPoints <= 0) {
               board[abilityDstIdx] = new Piece(PieceType::NO_PIECE, 0, abilityDstIdx);
             }
@@ -490,30 +550,96 @@ class Game {
             break;
           case P2_ASSASSIN:
             abilityDstPiece->healthPoints -= ASSASSIN_ABILITY_POINTS;
+            undoInfo.abilityType = AbilityType::ASSASSIN_DAMAGE;
+            undoInfo.affectedPieces[0] = abilityDstPiece;
             if(abilityDstPiece->healthPoints <= 0) {
               board[abilityDstIdx] = new Piece(PieceType::NO_PIECE, 0, abilityDstIdx);
             }
             break;
         }
+      } else {
+        undoInfo.abilityType = AbilityType::NO_ABILITY;
       }
-      
-      currentPlayer = ~currentPlayer;
+      this->moveNumberToUndoInfo[this->moveNumber] = undoInfo;
+      this->moveNumber += 1;
+      this->currentPlayer = ~currentPlayer;
+      return;
+    }
+
+    void undoLastMoveAndAbility() {
+      UndoInfo undoInfo = this->moveNumberToUndoInfo[this->moveNumber - 1];
+      if(undoInfo.moveSrcIdx != MOVE_SKIP) {
+        undoMove(undoInfo.moveSrcIdx, undoInfo.moveDstIdx);
+      }
+      switch(undoInfo.abilityType) {
+        Piece* affectedPiece;
+        case KING_DAMAGE:
+          affectedPiece = undoInfo.affectedPieces[0];
+          affectedPiece->healthPoints += KING_ABILITY_POINTS;
+          this->board[affectedPiece->squareIndex] = affectedPiece;
+          break;
+        case MAGE_DAMAGE:
+          for(int i = 0; i < 9; i++){ // 1 attacked square and 8 neighboring
+            affectedPiece = undoInfo.affectedPieces[i];
+            if(affectedPiece == nullptr) continue;
+            affectedPiece->healthPoints += MAGE_ABILITY_POINTS;
+            this->board[affectedPiece->squareIndex] = affectedPiece;
+          }
+          break;
+        case WARRIOR_DAMAGE:
+          affectedPiece = undoInfo.affectedPieces[0];
+          affectedPiece->healthPoints += WARRIOR_ABILITY_POINTS;
+          this->board[affectedPiece->squareIndex] = affectedPiece;
+          break;
+        case ASSASSIN_DAMAGE:
+          affectedPiece = undoInfo.affectedPieces[0];
+          affectedPiece->healthPoints += ASSASSIN_ABILITY_POINTS;
+          this->board[affectedPiece->squareIndex] = affectedPiece;
+          break;
+        case PAWN_DAMAGE:
+          affectedPiece = undoInfo.affectedPieces[0];
+          affectedPiece->healthPoints += PAWN_ABILITY_POINTS;
+          this->board[affectedPiece->squareIndex] = affectedPiece;
+          break;
+        case PAWN_MAKE_WALL:
+          affectedPiece = undoInfo.affectedPieces[0];
+          affectedPiece->print();
+          this->board[affectedPiece->squareIndex] = new Piece(PieceType::NO_PIECE, 0, affectedPiece->squareIndex);
+          break;
+        case PAWN_DESTROY_WALL:
+          affectedPiece = undoInfo.affectedPieces[0];
+          this->board[affectedPiece->squareIndex] = affectedPiece;
+          break;
+        case NO_ABILITY:
+          break;
+        default:
+          break;
+      }
+
+      this->moveNumber -= 1;
+
       return;
     }
 
     void print() {
+      std::cout << "------------------------------------------\n";
       for(int i = NUM_ROWS-1; i >= 0; i--) {
-        std::cout << i << " ";
+        std::cout << i << "   ";
         for(int j = 0; j < NUM_COLUMNS; j++) {
-          std::cout << std::string(*board[coordinatesToBoardIndex(j, i)]) << " ";
+          if(board[coordinatesToBoardIndex(j, i)]->type != PieceType::NO_PIECE) {
+            std::cout << std::string(*board[coordinatesToBoardIndex(j, i)]) << board[coordinatesToBoardIndex(j, i)]->healthPoints << " ";
+          } else {
+            std::cout << std::string(*board[coordinatesToBoardIndex(j, i)]) << "   " << " ";
+          }
         }
         std::cout << "\n";
       } 
-      std::cout << " ";
-      for(int i = 0; i < NUM_COLUMNS; i++) {
-        std::cout << " " << i;
-      }
       std::cout << "\n";
+      std::cout << "   ";
+      for(int i = 0; i < NUM_COLUMNS; i++) {
+        std::cout << " " << i << "   ";
+      }
+      std::cout << "\n------------------------------------------\n";
     }
 
     void makeMove(int moveSrcIdx, int moveDstIdx) {
@@ -526,10 +652,10 @@ class Game {
     /*
      * Since move is being reverted, goal here is to move from "destination" to "source".
      */
-    void undoMove(int originalMoveSrcIdx, int originalMoveDstIdx) {
-      board[originalMoveSrcIdx] = board[originalMoveDstIdx];
-      board[originalMoveSrcIdx]->squareIndex = originalMoveSrcIdx;
-      board[originalMoveDstIdx] = new Piece(PieceType::NO_PIECE, 0, 0);
+    void undoMove(int moveSrcIdx, int moveDstIdx) {
+      board[moveSrcIdx] = board[moveDstIdx];
+      board[moveSrcIdx]->squareIndex = moveSrcIdx;
+      board[moveDstIdx] = new Piece(PieceType::NO_PIECE, 0, moveDstIdx);
       return;
     }
 
@@ -538,8 +664,6 @@ class Game {
         std::vector<std::vector<std::vector<PlayerAbility>>> pieceTypeToSquareIndexToLegalAbilities
         ) {
       std::vector<PlayerAction> retval;
-      // TODO: can (probably) be optimized by calculating legal abilities first and then modifying
-      // them depending on the move
       for(int i = 0; i < NUM_STARTING_PIECES; i++) {
         Piece* currentPiece = playerToPieces[currentPlayer][i];
         if(currentPiece->healthPoints <= 0) continue; // dead pieces don't move
@@ -1900,7 +2024,7 @@ int main() {
       legalActions[i].print();
     }
     */
-    std::cout << "Total number of legal actions: " << legalActions.size() << "\n";
+    //std::cout << "Total number of legal actions: " << legalActions.size() << "\n";
     g.print();
     if(g.getCurrentPlayer() == PLAYER_1) {
       std::cout << "Player to move: PLAYER_1 (upper-case letters)\n";
@@ -1944,7 +2068,13 @@ int main() {
       abilitySrcIdx = coordinatesToBoardIndex(x3, y3);
       abilityDstIdx = coordinatesToBoardIndex(x4, y4);
     }
-    g.makeMoveAndAbility(moveSrcIdx, moveDstIdx, abilitySrcIdx, abilityDstIdx, stns);
+
+    if(x1 == -2 || x2 == -2 || x3 == -2 || x4 == -2 
+        || y1 == -2 || y2 == -2 || y3 == -2 || y4 == -2) { // TODO: testing, delete when done.
+      g.undoLastMoveAndAbility();
+    } else {
+      g.makeMoveAndAbility(moveSrcIdx, moveDstIdx, abilitySrcIdx, abilityDstIdx, stns);
+    }
     std::cout << "--------------------\n";
   }
   return 0;
