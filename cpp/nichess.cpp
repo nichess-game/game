@@ -617,6 +617,7 @@ class Game {
       }
 
       this->moveNumber -= 1;
+      this->currentPlayer = ~currentPlayer;
 
       return;
     }
