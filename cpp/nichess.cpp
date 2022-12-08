@@ -389,6 +389,7 @@ class Game {
       p2King = board[coordinatesToBoardIndex(7,7)];
 
       // Piece pointers are also kept in an array for faster access
+      // Order here matters
       std::vector<Piece*> p1Pieces{NUM_STARTING_PIECES};
       p1Pieces[0] = board[coordinatesToBoardIndex(0,0)];
       p1Pieces[1] = board[coordinatesToBoardIndex(0,1)];
@@ -399,6 +400,7 @@ class Game {
       p1Pieces[6] = board[coordinatesToBoardIndex(5,1)];
       playerToPieces[Player::PLAYER_1] = p1Pieces;
 
+      // Order here matters
       std::vector<Piece*> p2Pieces{NUM_STARTING_PIECES};
       p2Pieces[0] = board[coordinatesToBoardIndex(7,7)];
       p2Pieces[1] = board[coordinatesToBoardIndex(7,6)];
@@ -666,6 +668,10 @@ class Game {
         std::vector<std::vector<std::vector<PlayerAbility>>>& pieceTypeToSquareIndexToLegalAbilities
         ) {
       std::vector<PlayerAction> retval;
+      // If King is dead, game is over and there are no legal actions
+      if(playerToPieces[currentPlayer][0]->healthPoints <= 0) {
+        return retval;
+      }
       for(int i = 0; i < NUM_STARTING_PIECES; i++) {
         Piece* currentPiece = playerToPieces[currentPlayer][i];
         if(currentPiece->healthPoints <= 0) continue; // dead pieces don't move
