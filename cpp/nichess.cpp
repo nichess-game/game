@@ -413,7 +413,7 @@ class Game {
     /*
      * Assumes that the move and ability are legal.
      */
-    void makeMoveAndAbility(int moveSrcIdx, int moveDstIdx, int abilitySrcIdx, int abilityDstIdx, std::vector<std::vector<int>> squareToNeighboringSquares) {
+    void makeMoveAndAbility(int moveSrcIdx, int moveDstIdx, int abilitySrcIdx, int abilityDstIdx, std::vector<std::vector<int>>& squareToNeighboringSquares) {
       UndoInfo undoInfo = UndoInfo();
       undoInfo.moveSrcIdx = moveSrcIdx;
       undoInfo.moveDstIdx = moveDstIdx;
@@ -662,8 +662,8 @@ class Game {
     }
 
     std::vector<PlayerAction> legalActions(
-        std::vector<std::vector<std::vector<PlayerMove>>> pieceTypeToSquareIndexToLegalMoves,
-        std::vector<std::vector<std::vector<PlayerAbility>>> pieceTypeToSquareIndexToLegalAbilities
+        std::vector<std::vector<std::vector<PlayerMove>>>& pieceTypeToSquareIndexToLegalMoves,
+        std::vector<std::vector<std::vector<PlayerAbility>>>& pieceTypeToSquareIndexToLegalAbilities
         ) {
       std::vector<PlayerAction> retval;
       for(int i = 0; i < NUM_STARTING_PIECES; i++) {
