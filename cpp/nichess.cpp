@@ -568,9 +568,7 @@ class Game {
 
     void undoLastMoveAndAbility() {
       UndoInfo undoInfo = this->moveNumberToUndoInfo[this->moveNumber - 1];
-      if(undoInfo.moveSrcIdx != MOVE_SKIP) {
-        undoMove(undoInfo.moveSrcIdx, undoInfo.moveDstIdx);
-      }
+      // undo ability
       switch(undoInfo.abilityType) {
         Piece* affectedPiece;
         case KING_DAMAGE:
@@ -603,7 +601,6 @@ class Game {
           break;
         case PAWN_MAKE_WALL:
           affectedPiece = undoInfo.affectedPieces[0];
-          affectedPiece->print();
           this->board[affectedPiece->squareIndex] = new Piece(PieceType::NO_PIECE, 0, affectedPiece->squareIndex);
           break;
         case PAWN_DESTROY_WALL:
@@ -614,6 +611,10 @@ class Game {
           break;
         default:
           break;
+      }
+      // undo move
+      if(undoInfo.moveSrcIdx != MOVE_SKIP) {
+        undoMove(undoInfo.moveSrcIdx, undoInfo.moveDstIdx);
       }
 
       this->moveNumber -= 1;
