@@ -682,6 +682,7 @@ class Game {
           makeMove(legalMoves[j].moveSrcIdx, legalMoves[j].moveDstIdx);
           for(int k = 0; k < NUM_STARTING_PIECES; k++) {
             Piece* cp2 = playerToPieces[currentPlayer][k];
+            if(cp2->healthPoints <= 0) continue; // no abilities for dead pieces
             auto legalAbilities = pieceTypeToSquareIndexToLegalAbilities[cp2->type][cp2->squareIndex];
             for(int l = 0; l < legalAbilities.size(); l++) {
               PlayerAbility currentAbility = legalAbilities[l];
@@ -1042,6 +1043,7 @@ class Game {
       // player can skip the move
       for(int k = 0; k < NUM_STARTING_PIECES; k++) {
         Piece* cp2 = playerToPieces[currentPlayer][k];
+        if(cp2->healthPoints <= 0) continue; // no abilities for dead pieces
         auto legalAbilities = pieceTypeToSquareIndexToLegalAbilities[cp2->type][cp2->squareIndex];
         for(int l = 0; l < legalAbilities.size(); l++) {
           Piece* destinationSquarePiece = board[legalAbilities[l].abilityDstIdx];
