@@ -109,6 +109,8 @@ class Game {
     void makeAction(int moveSrcIdx, int moveDstIdx, int abilitySrcIdx, int abilityDstIdx);
     void undoLastAction();
     std::vector<PlayerAction> legalActions();
+    std::vector<PlayerMove> legalMovesByPiece(int srcSquareIdx);
+    std::vector<PlayerAbility> usefulLegalAbilitiesByPiece(int srcSquareIdx);
     Player getCurrentPlayer();
     void print();
 };
