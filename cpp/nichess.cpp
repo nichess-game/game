@@ -238,9 +238,623 @@ UndoInfo::UndoInfo(int moveSrcIdx, int moveDstIdx, AbilityType abilityType) {
   }
 }
 
+bool isOffBoard(int x, int y) {
+  if(x >= NUM_COLUMNS || x < 0 || y >= NUM_ROWS || y < 0)
+    return true;
+  else
+    return false;
+}
+
+/*
+ * For each Piece type, for each square, returns legal moves as if there were no other
+ * pieces on the board. Elsewhere, occupied squares will be discarded from the legal moves.
+ */
+std::vector<std::vector<std::vector<PlayerMove>>> generateLegalMovesOnAnEmptyBoard() {
+  std::vector<std::vector<std::vector<PlayerMove>>> pieceTypeToSquareToLegalMoves{NUM_PIECE_TYPE};
+
+  // p1 king moves
+  std::vector<std::vector<PlayerMove>> squareToP1KingMoves{NUM_ROWS*NUM_COLUMNS};
+  for(int move_row = 0; move_row < NUM_ROWS; move_row++) {
+    for(int move_column = 0; move_column < NUM_COLUMNS; move_column++) {
+      int srcSquareIndex = coordinatesToBoardIndex(move_column, move_row);
+      std::vector<PlayerMove> playerMoves;
+      for(int dx = -1; dx < 2; dx++) {
+        for(int dy = -1; dy < 2; dy++) {
+          if(dx == 0 && dy == 0) continue;
+          int move_dst_x = move_column + dx;
+          int move_dst_y = move_row + dy;
+          if(isOffBoard(move_dst_x, move_dst_y)) continue;
+          PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x, move_dst_y));
+          playerMoves.push_back(pm);
+        }
+      }
+      squareToP1KingMoves[srcSquareIndex] = playerMoves;
+    }
+  }
+  pieceTypeToSquareToLegalMoves[P1_KING] = squareToP1KingMoves;
+
+  // p1 mage moves
+  std::vector<std::vector<PlayerMove>> squareToP1MageMoves{NUM_ROWS*NUM_COLUMNS};
+  for(int move_row = 0; move_row < NUM_ROWS; move_row++) {
+    for(int move_column = 0; move_column < NUM_COLUMNS; move_column++) {
+      int srcSquareIndex = coordinatesToBoardIndex(move_column, move_row);
+      std::vector<PlayerMove> playerMoves;
+      for(int dx = -1; dx < 2; dx++) {
+        for(int dy = -1; dy < 2; dy++) {
+          if(dx == 0 && dy == 0) continue;
+          int move_dst_x = move_column + dx;
+          int move_dst_y = move_row + dy;
+          if(isOffBoard(move_dst_x, move_dst_y)) continue;
+          PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x, move_dst_y));
+          playerMoves.push_back(pm);
+        }
+      }
+      squareToP1MageMoves[srcSquareIndex] = playerMoves;
+    }
+  }
+  pieceTypeToSquareToLegalMoves[P1_MAGE] = squareToP1MageMoves;
+
+  // p1 pawn moves
+  std::vector<std::vector<PlayerMove>> squareToP1PawnMoves{NUM_ROWS*NUM_COLUMNS};
+  for(int move_row = 0; move_row < NUM_ROWS; move_row++) {
+    for(int move_column = 0; move_column < NUM_COLUMNS; move_column++) {
+      int srcSquareIndex = coordinatesToBoardIndex(move_column, move_row);
+      std::vector<PlayerMove> playerMoves;
+      for(int dx = -1; dx < 2; dx++) {
+        for(int dy = -1; dy < 2; dy++) {
+          if(dx == 0 && dy == 0) continue;
+          int move_dst_x = move_column + dx;
+          int move_dst_y = move_row + dy;
+          if(isOffBoard(move_dst_x, move_dst_y)) continue;
+          PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x, move_dst_y));
+          playerMoves.push_back(pm);
+        }
+      }
+      // pawn can also go 2 squares forward
+      int move_dst_x = move_column;
+      int move_dst_y = move_row + 2;
+      if(!isOffBoard(move_dst_x, move_dst_y)){
+        PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x, move_dst_y));
+        playerMoves.push_back(pm);
+      }
+      squareToP1PawnMoves[srcSquareIndex] = playerMoves;
+    }
+  }
+  pieceTypeToSquareToLegalMoves[P1_PAWN] = squareToP1PawnMoves;
+
+  // p1 warrior moves
+  std::vector<std::vector<PlayerMove>> squareToP1WarriorMoves{NUM_ROWS*NUM_COLUMNS};
+  for(int move_row = 0; move_row < NUM_ROWS; move_row++) {
+    for(int move_column = 0; move_column < NUM_COLUMNS; move_column++) {
+      int srcSquareIndex = coordinatesToBoardIndex(move_column, move_row);
+      std::vector<PlayerMove> playerMoves;
+      for(int dx = -1; dx < 2; dx++) {
+        for(int dy = -1; dy < 2; dy++) {
+          if(dx == 0 && dy == 0) continue;
+          int move_dst_x = move_column + dx;
+          int move_dst_y = move_row + dy;
+          if(isOffBoard(move_dst_x, move_dst_y)) continue;
+          PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x, move_dst_y));
+          playerMoves.push_back(pm);
+        }
+      }
+      squareToP1WarriorMoves[srcSquareIndex] = playerMoves;
+    }
+  }
+  pieceTypeToSquareToLegalMoves[P1_WARRIOR] = squareToP1WarriorMoves;
+
+  // p1 wall moves
+  // walls can't move
+  std::vector<std::vector<PlayerMove>> squareToP1WallMoves{NUM_ROWS*NUM_COLUMNS};
+  for(int move_row = 0; move_row < NUM_ROWS; move_row++) {
+    for(int move_column = 0; move_column < NUM_COLUMNS; move_column++) {
+      int srcSquareIndex = coordinatesToBoardIndex(move_column, move_row);
+      std::vector<PlayerMove> playerMoves;
+      squareToP1WallMoves[srcSquareIndex] = playerMoves;
+    }
+  }
+  pieceTypeToSquareToLegalMoves[P1_WALL] = squareToP1WallMoves;
+
+  // p1 assassin moves
+  std::vector<std::vector<PlayerMove>> squareToP1AssassinMoves{NUM_ROWS*NUM_COLUMNS};
+  for(int move_row = 0; move_row < NUM_ROWS; move_row++) {
+    for(int move_column = 0; move_column < NUM_COLUMNS; move_column++) {
+      int srcSquareIndex = coordinatesToBoardIndex(move_column, move_row);
+      std::vector<PlayerMove> playerMoves;
+      for(int dx = -2; dx < 3; dx++) {
+        for(int dy = -2; dy < 3; dy++) {
+          if(dx == 0 && dy == 0) continue;
+          int move_dst_x = move_column + dx;
+          int move_dst_y = move_row + dy;
+          if(isOffBoard(move_dst_x, move_dst_y)) continue;
+          PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x, move_dst_y));
+          playerMoves.push_back(pm);
+        }
+      }
+      // 4 extra moves:
+      int move_dst_x1 = move_column + 3;
+      int move_dst_y1 = move_row + 3;
+      int move_dst_x2 = move_column + 3;
+      int move_dst_y2 = move_row - 3;
+      int move_dst_x3 = move_column - 3;
+      int move_dst_y3 = move_row + 3;
+      int move_dst_x4 = move_column - 3;
+      int move_dst_y4 = move_row - 3;
+      if(!isOffBoard(move_dst_x1, move_dst_y1)){
+        PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x1, move_dst_y1));
+        playerMoves.push_back(pm);
+      }
+      if(!isOffBoard(move_dst_x2, move_dst_y2)){
+        PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x2, move_dst_y2));
+        playerMoves.push_back(pm);
+      }
+      if(!isOffBoard(move_dst_x3, move_dst_y3)){
+        PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x3, move_dst_y3));
+        playerMoves.push_back(pm);
+      }
+      if(!isOffBoard(move_dst_x4, move_dst_y4)){
+        PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x4, move_dst_y4));
+        playerMoves.push_back(pm);
+      }
+
+      squareToP1AssassinMoves[srcSquareIndex] = playerMoves;
+    }
+  }
+  pieceTypeToSquareToLegalMoves[P1_ASSASSIN] = squareToP1AssassinMoves;
+
+  // p2 king moves
+  std::vector<std::vector<PlayerMove>> squareToP2KingMoves{NUM_ROWS*NUM_COLUMNS};
+  for(int move_row = 0; move_row < NUM_ROWS; move_row++) {
+    for(int move_column = 0; move_column < NUM_COLUMNS; move_column++) {
+      int srcSquareIndex = coordinatesToBoardIndex(move_column, move_row);
+      std::vector<PlayerMove> playerMoves;
+      for(int dx = -1; dx < 2; dx++) {
+        for(int dy = -1; dy < 2; dy++) {
+          if(dx == 0 && dy == 0) continue;
+          int move_dst_x = move_column + dx;
+          int move_dst_y = move_row + dy;
+          if(isOffBoard(move_dst_x, move_dst_y)) continue;
+          PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x, move_dst_y));
+          playerMoves.push_back(pm);
+        }
+      }
+      squareToP2KingMoves[srcSquareIndex] = playerMoves;
+    }
+  }
+  pieceTypeToSquareToLegalMoves[P2_KING] = squareToP2KingMoves;
+
+  // p2 mage moves
+  std::vector<std::vector<PlayerMove>> squareToP2MageMoves{NUM_ROWS*NUM_COLUMNS};
+  for(int move_row = 0; move_row < NUM_ROWS; move_row++) {
+    for(int move_column = 0; move_column < NUM_COLUMNS; move_column++) {
+      int srcSquareIndex = coordinatesToBoardIndex(move_column, move_row);
+      std::vector<PlayerMove> playerMoves;
+      for(int dx = -1; dx < 2; dx++) {
+        for(int dy = -1; dy < 2; dy++) {
+          if(dx == 0 && dy == 0) continue;
+          int move_dst_x = move_column + dx;
+          int move_dst_y = move_row + dy;
+          if(isOffBoard(move_dst_x, move_dst_y)) continue;
+          PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x, move_dst_y));
+          playerMoves.push_back(pm);
+        }
+      }
+      squareToP2MageMoves[srcSquareIndex] = playerMoves;
+    }
+  }
+  pieceTypeToSquareToLegalMoves[P2_MAGE] = squareToP2MageMoves;
+
+  // p2 pawn moves
+  std::vector<std::vector<PlayerMove>> squareToP2PawnMoves{NUM_ROWS*NUM_COLUMNS};
+  for(int move_row = 0; move_row < NUM_ROWS; move_row++) {
+    for(int move_column = 0; move_column < NUM_COLUMNS; move_column++) {
+      int srcSquareIndex = coordinatesToBoardIndex(move_column, move_row);
+      std::vector<PlayerMove> playerMoves;
+      for(int dx = -1; dx < 2; dx++) {
+        for(int dy = -1; dy < 2; dy++) {
+          if(dx == 0 && dy == 0) continue;
+          int move_dst_x = move_column + dx;
+          int move_dst_y = move_row + dy;
+          if(isOffBoard(move_dst_x, move_dst_y)) continue;
+          PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x, move_dst_y));
+          playerMoves.push_back(pm);
+        }
+      }
+      // pawn can also go 2 squares forward(for p2 this means -2 on y axis)
+      int move_dst_x = move_column;
+      int move_dst_y = move_row - 2;
+      if(!isOffBoard(move_dst_x, move_dst_y)){
+        PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x, move_dst_y));
+        playerMoves.push_back(pm);
+      }
+      squareToP2PawnMoves[srcSquareIndex] = playerMoves;
+    }
+  }
+  pieceTypeToSquareToLegalMoves[P2_PAWN] = squareToP2PawnMoves;
+
+  // p2 warrior moves
+  std::vector<std::vector<PlayerMove>> squareToP2WarriorMoves{NUM_ROWS*NUM_COLUMNS};
+  for(int move_row = 0; move_row < NUM_ROWS; move_row++) {
+    for(int move_column = 0; move_column < NUM_COLUMNS; move_column++) {
+      int srcSquareIndex = coordinatesToBoardIndex(move_column, move_row);
+      std::vector<PlayerMove> playerMoves;
+      for(int dx = -1; dx < 2; dx++) {
+        for(int dy = -1; dy < 2; dy++) {
+          if(dx == 0 && dy == 0) continue;
+          int move_dst_x = move_column + dx;
+          int move_dst_y = move_row + dy;
+          if(isOffBoard(move_dst_x, move_dst_y)) continue;
+          PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x, move_dst_y));
+          playerMoves.push_back(pm);
+        }
+      }
+      squareToP2WarriorMoves[srcSquareIndex] = playerMoves;
+    }
+  }
+  pieceTypeToSquareToLegalMoves[P2_WARRIOR] = squareToP2WarriorMoves;
+
+  // p2 wall moves
+  // walls can't move
+  std::vector<std::vector<PlayerMove>> squareToP2WallMoves{NUM_ROWS*NUM_COLUMNS};
+  for(int move_row = 0; move_row < NUM_ROWS; move_row++) {
+    for(int move_column = 0; move_column < NUM_COLUMNS; move_column++) {
+      int srcSquareIndex = coordinatesToBoardIndex(move_column, move_row);
+      std::vector<PlayerMove> playerMoves;
+      squareToP2WallMoves[srcSquareIndex] = playerMoves;
+    }
+  }
+  pieceTypeToSquareToLegalMoves[P2_WALL] = squareToP2WallMoves;
+
+  // p2 assassin moves
+  std::vector<std::vector<PlayerMove>> squareToP2AssassinMoves{NUM_ROWS*NUM_COLUMNS};
+  for(int move_row = 0; move_row < NUM_ROWS; move_row++) {
+    for(int move_column = 0; move_column < NUM_COLUMNS; move_column++) {
+      int srcSquareIndex = coordinatesToBoardIndex(move_column, move_row);
+      std::vector<PlayerMove> playerMoves;
+      for(int dx = -2; dx < 3; dx++) {
+        for(int dy = -2; dy < 3; dy++) {
+          if(dx == 0 && dy == 0) continue;
+          int move_dst_x = move_column + dx;
+          int move_dst_y = move_row + dy;
+          if(isOffBoard(move_dst_x, move_dst_y)) continue;
+          PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x, move_dst_y));
+          playerMoves.push_back(pm);
+        }
+      }
+      // 4 extra moves:
+      int move_dst_x1 = move_column + 3;
+      int move_dst_y1 = move_row + 3;
+      int move_dst_x2 = move_column + 3;
+      int move_dst_y2 = move_row - 3;
+      int move_dst_x3 = move_column - 3;
+      int move_dst_y3 = move_row + 3;
+      int move_dst_x4 = move_column - 3;
+      int move_dst_y4 = move_row - 3;
+      if(!isOffBoard(move_dst_x1, move_dst_y1)){
+        PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x1, move_dst_y1));
+        playerMoves.push_back(pm);
+      }
+      if(!isOffBoard(move_dst_x2, move_dst_y2)){
+        PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x2, move_dst_y2));
+        playerMoves.push_back(pm);
+      }
+      if(!isOffBoard(move_dst_x3, move_dst_y3)){
+        PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x3, move_dst_y3));
+        playerMoves.push_back(pm);
+      }
+      if(!isOffBoard(move_dst_x4, move_dst_y4)){
+        PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x4, move_dst_y4));
+        playerMoves.push_back(pm);
+      }
+
+      squareToP2AssassinMoves[srcSquareIndex] = playerMoves;
+    }
+  }
+  pieceTypeToSquareToLegalMoves[P2_ASSASSIN] = squareToP2AssassinMoves;
+
+  // NO_PIECE moves (shouldn't be used, added for completeness)
+  std::vector<std::vector<PlayerMove>> squareToNoPieceMoves{NUM_ROWS*NUM_COLUMNS};
+  for(int move_row = 0; move_row < NUM_ROWS; move_row++) {
+    for(int move_column = 0; move_column < NUM_COLUMNS; move_column++) {
+      int srcSquareIndex = coordinatesToBoardIndex(move_column, move_row);
+      std::vector<PlayerMove> playerMoves;
+      squareToNoPieceMoves[srcSquareIndex] = playerMoves;
+    }
+  }
+  pieceTypeToSquareToLegalMoves[NO_PIECE] = squareToNoPieceMoves;
+
+  return pieceTypeToSquareToLegalMoves;
+}
+
+/*
+ * For each Piece type, for each square, returns legal abilities as if there were no other
+ * pieces on the board. Elsewhere, abilities will be filtered by the actual board position.
+ */
+std::vector<std::vector<std::vector<PlayerAbility>>> generateLegalAbilitiesOnAnEmptyBoard() {
+  std::vector<std::vector<std::vector<PlayerAbility>>> pieceTypeToSquareToLegalAbilities{NUM_PIECE_TYPE};
+
+  // p1 king abilities
+  std::vector<std::vector<PlayerAbility>> squareToP1KingAbilities{NUM_ROWS*NUM_COLUMNS};
+  for(int ability_row = 0; ability_row < NUM_ROWS; ability_row++) {
+    for(int ability_column = 0; ability_column < NUM_COLUMNS; ability_column++) {
+      int srcSquareIndex = coordinatesToBoardIndex(ability_column, ability_row);
+      std::vector<PlayerAbility> playerAbilities;
+      for(int dx = -1; dx < 2; dx++) {
+        for(int dy = -1; dy < 2; dy++) {
+          if(dx == 0 && dy == 0) continue;
+          int ability_dst_x = ability_column + dx;
+          int ability_dst_y = ability_row + dy;
+          if(isOffBoard(ability_dst_x, ability_dst_y)) continue;
+          PlayerAbility pa = PlayerAbility(srcSquareIndex, coordinatesToBoardIndex(ability_dst_x, ability_dst_y));
+          playerAbilities.push_back(pa);
+        }
+      }
+      squareToP1KingAbilities[srcSquareIndex] = playerAbilities;
+    }
+  }
+  pieceTypeToSquareToLegalAbilities[P1_KING] = squareToP1KingAbilities;
+
+  // p1 mage abilities
+  std::vector<std::vector<PlayerAbility>> squareToP1MageAbilities{NUM_ROWS*NUM_COLUMNS};
+  for(int ability_row = 0; ability_row < NUM_ROWS; ability_row++) {
+    for(int ability_column = 0; ability_column < NUM_COLUMNS; ability_column++) {
+      int srcSquareIndex = coordinatesToBoardIndex(ability_column, ability_row);
+      std::vector<PlayerAbility> playerAbilities;
+      for(int dx = -2; dx < 3; dx++) {
+        for(int dy = -2; dy < 3; dy++) {
+          if(dx == 0 && dy == 0) continue;
+          int ability_dst_x = ability_column + dx;
+          int ability_dst_y = ability_row + dy;
+          if(isOffBoard(ability_dst_x, ability_dst_y)) continue;
+          PlayerAbility pa = PlayerAbility(srcSquareIndex, coordinatesToBoardIndex(ability_dst_x, ability_dst_y));
+          playerAbilities.push_back(pa);
+        }
+      }
+      squareToP1MageAbilities[srcSquareIndex] = playerAbilities;
+    }
+  }
+  pieceTypeToSquareToLegalAbilities[P1_MAGE] = squareToP1MageAbilities;
+
+  // p1 pawn abilities
+  std::vector<std::vector<PlayerAbility>> squareToP1PawnAbilities{NUM_ROWS*NUM_COLUMNS};
+  for(int ability_row = 0; ability_row < NUM_ROWS; ability_row++) {
+    for(int ability_column = 0; ability_column < NUM_COLUMNS; ability_column++) {
+      int srcSquareIndex = coordinatesToBoardIndex(ability_column, ability_row);
+      std::vector<PlayerAbility> playerAbilities;
+      for(int dx = -1; dx < 2; dx++) {
+        for(int dy = -1; dy < 2; dy++) {
+          if(dx == 0 && dy == 0) continue;
+          int ability_dst_x = ability_column + dx;
+          int ability_dst_y = ability_row + dy;
+          if(isOffBoard(ability_dst_x, ability_dst_y)) continue;
+          PlayerAbility pa = PlayerAbility(srcSquareIndex, coordinatesToBoardIndex(ability_dst_x, ability_dst_y));
+          playerAbilities.push_back(pa);
+        }
+      }
+      squareToP1PawnAbilities[srcSquareIndex] = playerAbilities;
+    }
+  }
+  pieceTypeToSquareToLegalAbilities[P1_PAWN] = squareToP1PawnAbilities;
+
+  // p1 warrior abilities
+  std::vector<std::vector<PlayerAbility>> squareToP1WarriorAbilities{NUM_ROWS*NUM_COLUMNS};
+  for(int ability_row = 0; ability_row < NUM_ROWS; ability_row++) {
+    for(int ability_column = 0; ability_column < NUM_COLUMNS; ability_column++) {
+      int srcSquareIndex = coordinatesToBoardIndex(ability_column, ability_row);
+      std::vector<PlayerAbility> playerAbilities;
+      for(int dx = -1; dx < 2; dx++) {
+        for(int dy = -1; dy < 2; dy++) {
+          if(dx == 0 && dy == 0) continue;
+          int ability_dst_x = ability_column + dx;
+          int ability_dst_y = ability_row + dy;
+          if(isOffBoard(ability_dst_x, ability_dst_y)) continue;
+          PlayerAbility pa = PlayerAbility(srcSquareIndex, coordinatesToBoardIndex(ability_dst_x, ability_dst_y));
+          playerAbilities.push_back(pa);
+        }
+      }
+      squareToP1WarriorAbilities[srcSquareIndex] = playerAbilities;
+    }
+  }
+  pieceTypeToSquareToLegalAbilities[P1_WARRIOR] = squareToP1WarriorAbilities;
+
+  // p1 wall abilities
+  // walls can't ability
+  std::vector<std::vector<PlayerAbility>> squareToP1WallAbilities{NUM_ROWS*NUM_COLUMNS};
+  for(int ability_row = 0; ability_row < NUM_ROWS; ability_row++) {
+    for(int ability_column = 0; ability_column < NUM_COLUMNS; ability_column++) {
+      int srcSquareIndex = coordinatesToBoardIndex(ability_column, ability_row);
+      std::vector<PlayerAbility> playerAbilities;
+      squareToP1WallAbilities[srcSquareIndex] = playerAbilities;
+    }
+  }
+  pieceTypeToSquareToLegalAbilities[P1_WALL] = squareToP1WallAbilities;
+
+  // p1 assassin abilities
+  std::vector<std::vector<PlayerAbility>> squareToP1AssassinAbilities{NUM_ROWS*NUM_COLUMNS};
+  for(int ability_row = 0; ability_row < NUM_ROWS; ability_row++) {
+    for(int ability_column = 0; ability_column < NUM_COLUMNS; ability_column++) {
+      int srcSquareIndex = coordinatesToBoardIndex(ability_column, ability_row);
+      std::vector<PlayerAbility> playerAbilities;
+      for(int dx = -1; dx < 2; dx++) {
+        for(int dy = -1; dy < 2; dy++) {
+          if(dx == 0 && dy == 0) continue;
+          int ability_dst_x = ability_column + dx;
+          int ability_dst_y = ability_row + dy;
+          if(isOffBoard(ability_dst_x, ability_dst_y)) continue;
+          PlayerAbility pa = PlayerAbility(srcSquareIndex, coordinatesToBoardIndex(ability_dst_x, ability_dst_y));
+          playerAbilities.push_back(pa);
+        }
+      }
+      squareToP1AssassinAbilities[srcSquareIndex] = playerAbilities;
+    }
+  }
+  pieceTypeToSquareToLegalAbilities[P1_ASSASSIN] = squareToP1AssassinAbilities;
+
+  // p2 king abilities
+  std::vector<std::vector<PlayerAbility>> squareToP2KingAbilities{NUM_ROWS*NUM_COLUMNS};
+  for(int ability_row = 0; ability_row < NUM_ROWS; ability_row++) {
+    for(int ability_column = 0; ability_column < NUM_COLUMNS; ability_column++) {
+      int srcSquareIndex = coordinatesToBoardIndex(ability_column, ability_row);
+      std::vector<PlayerAbility> playerAbilities;
+      for(int dx = -1; dx < 2; dx++) {
+        for(int dy = -1; dy < 2; dy++) {
+          if(dx == 0 && dy == 0) continue;
+          int ability_dst_x = ability_column + dx;
+          int ability_dst_y = ability_row + dy;
+          if(isOffBoard(ability_dst_x, ability_dst_y)) continue;
+          PlayerAbility pa = PlayerAbility(srcSquareIndex, coordinatesToBoardIndex(ability_dst_x, ability_dst_y));
+          playerAbilities.push_back(pa);
+        }
+      }
+      squareToP2KingAbilities[srcSquareIndex] = playerAbilities;
+    }
+  }
+  pieceTypeToSquareToLegalAbilities[P2_KING] = squareToP2KingAbilities;
+
+  // p2 mage abilities
+  std::vector<std::vector<PlayerAbility>> squareToP2MageAbilities{NUM_ROWS*NUM_COLUMNS};
+  for(int ability_row = 0; ability_row < NUM_ROWS; ability_row++) {
+    for(int ability_column = 0; ability_column < NUM_COLUMNS; ability_column++) {
+      int srcSquareIndex = coordinatesToBoardIndex(ability_column, ability_row);
+      std::vector<PlayerAbility> playerAbilities;
+      for(int dx = -2; dx < 3; dx++) {
+        for(int dy = -2; dy < 3; dy++) {
+          if(dx == 0 && dy == 0) continue;
+          int ability_dst_x = ability_column + dx;
+          int ability_dst_y = ability_row + dy;
+          if(isOffBoard(ability_dst_x, ability_dst_y)) continue;
+          PlayerAbility pa = PlayerAbility(srcSquareIndex, coordinatesToBoardIndex(ability_dst_x, ability_dst_y));
+          playerAbilities.push_back(pa);
+        }
+      }
+      squareToP2MageAbilities[srcSquareIndex] = playerAbilities;
+    }
+  }
+  pieceTypeToSquareToLegalAbilities[P2_MAGE] = squareToP2MageAbilities;
+
+  // p2 pawn abilities
+  std::vector<std::vector<PlayerAbility>> squareToP2PawnAbilities{NUM_ROWS*NUM_COLUMNS};
+  for(int ability_row = 0; ability_row < NUM_ROWS; ability_row++) {
+    for(int ability_column = 0; ability_column < NUM_COLUMNS; ability_column++) {
+      int srcSquareIndex = coordinatesToBoardIndex(ability_column, ability_row);
+      std::vector<PlayerAbility> playerAbilities;
+      for(int dx = -1; dx < 2; dx++) {
+        for(int dy = -1; dy < 2; dy++) {
+          if(dx == 0 && dy == 0) continue;
+          int ability_dst_x = ability_column + dx;
+          int ability_dst_y = ability_row + dy;
+          if(isOffBoard(ability_dst_x, ability_dst_y)) continue;
+          PlayerAbility pa = PlayerAbility(srcSquareIndex, coordinatesToBoardIndex(ability_dst_x, ability_dst_y));
+          playerAbilities.push_back(pa);
+        }
+      }
+      squareToP2PawnAbilities[srcSquareIndex] = playerAbilities;
+    }
+  }
+  pieceTypeToSquareToLegalAbilities[P2_PAWN] = squareToP2PawnAbilities;
+
+  // p2 warrior abilities
+  std::vector<std::vector<PlayerAbility>> squareToP2WarriorAbilities{NUM_ROWS*NUM_COLUMNS};
+  for(int ability_row = 0; ability_row < NUM_ROWS; ability_row++) {
+    for(int ability_column = 0; ability_column < NUM_COLUMNS; ability_column++) {
+      int srcSquareIndex = coordinatesToBoardIndex(ability_column, ability_row);
+      std::vector<PlayerAbility> playerAbilities;
+      for(int dx = -1; dx < 2; dx++) {
+        for(int dy = -1; dy < 2; dy++) {
+          if(dx == 0 && dy == 0) continue;
+          int ability_dst_x = ability_column + dx;
+          int ability_dst_y = ability_row + dy;
+          if(isOffBoard(ability_dst_x, ability_dst_y)) continue;
+          PlayerAbility pa = PlayerAbility(srcSquareIndex, coordinatesToBoardIndex(ability_dst_x, ability_dst_y));
+          playerAbilities.push_back(pa);
+        }
+      }
+      squareToP2WarriorAbilities[srcSquareIndex] = playerAbilities;
+    }
+  }
+  pieceTypeToSquareToLegalAbilities[P2_WARRIOR] = squareToP2WarriorAbilities;
+
+  // p2 wall abilities
+  // walls can't ability
+  std::vector<std::vector<PlayerAbility>> squareToP2WallAbilities{NUM_ROWS*NUM_COLUMNS};
+  for(int ability_row = 0; ability_row < NUM_ROWS; ability_row++) {
+    for(int ability_column = 0; ability_column < NUM_COLUMNS; ability_column++) {
+      int srcSquareIndex = coordinatesToBoardIndex(ability_column, ability_row);
+      std::vector<PlayerAbility> playerAbilities;
+      squareToP2WallAbilities[srcSquareIndex] = playerAbilities;
+    }
+  }
+  pieceTypeToSquareToLegalAbilities[P2_WALL] = squareToP2WallAbilities;
+
+  // p2 assassin abilities
+  std::vector<std::vector<PlayerAbility>> squareToP2AssassinAbilities{NUM_ROWS*NUM_COLUMNS};
+  for(int ability_row = 0; ability_row < NUM_ROWS; ability_row++) {
+    for(int ability_column = 0; ability_column < NUM_COLUMNS; ability_column++) {
+      int srcSquareIndex = coordinatesToBoardIndex(ability_column, ability_row);
+      std::vector<PlayerAbility> playerAbilities;
+      for(int dx = -1; dx < 2; dx++) {
+        for(int dy = -1; dy < 2; dy++) {
+          if(dx == 0 && dy == 0) continue;
+          int ability_dst_x = ability_column + dx;
+          int ability_dst_y = ability_row + dy;
+          if(isOffBoard(ability_dst_x, ability_dst_y)) continue;
+          PlayerAbility pa = PlayerAbility(srcSquareIndex, coordinatesToBoardIndex(ability_dst_x, ability_dst_y));
+          playerAbilities.push_back(pa);
+        }
+      }
+      squareToP2AssassinAbilities[srcSquareIndex] = playerAbilities;
+    }
+  }
+  pieceTypeToSquareToLegalAbilities[P2_ASSASSIN] = squareToP2AssassinAbilities;
+
+  // NO_PIECE abilities
+  std::vector<std::vector<PlayerAbility>> squareToNoPieceAbilities{NUM_ROWS*NUM_COLUMNS};
+  for(int ability_row = 0; ability_row < NUM_ROWS; ability_row++) {
+    for(int ability_column = 0; ability_column < NUM_COLUMNS; ability_column++) {
+      int srcSquareIndex = coordinatesToBoardIndex(ability_column, ability_row);
+      std::vector<PlayerAbility> playerAbilities;
+      squareToNoPieceAbilities[srcSquareIndex] = playerAbilities;
+    }
+  }
+  pieceTypeToSquareToLegalAbilities[NO_PIECE] = squareToNoPieceAbilities;
+
+
+  return pieceTypeToSquareToLegalAbilities;
+}
+
+/*
+ * For index of each square, finds indices of squares that are touching it.
+ * Used for mage ability.
+ */
+std::vector<std::vector<int>> generateSquareToNeighboringSquares() {
+  std::vector<std::vector<int>> squareToNeighboringSquares{NUM_ROWS * NUM_COLUMNS};
+  for(int srcY = 0; srcY < NUM_ROWS; srcY++) {
+    for(int srcX = 0; srcX < NUM_COLUMNS; srcX++) {
+      std::vector<int> neighboringSquares;
+      int srcIndex = coordinatesToBoardIndex(srcX, srcY);
+      for(int k = -1; k < 2; k++) {
+        for(int l = -1; l < 2; l++) {
+          if(k == 0 && l == 0) continue;
+          int newX = srcX + k;
+          int newY = srcY + l;
+          if(isOffBoard(newX, newY)) continue;
+          int newIndex = coordinatesToBoardIndex(newX, newY);
+          neighboringSquares.push_back(newIndex);
+        }
+      }
+      squareToNeighboringSquares[srcIndex] = neighboringSquares;  
+    }
+  }
+  return squareToNeighboringSquares;
+}
+
+
 Game::Game() {
   moveNumber = 0;
   currentPlayer = Player::PLAYER_1;
+  pieceTypeToSquareIndexToLegalMoves = generateLegalMovesOnAnEmptyBoard();
+  pieceTypeToSquareIndexToLegalAbilities = generateLegalAbilitiesOnAnEmptyBoard();
+  squareToNeighboringSquares = generateSquareToNeighboringSquares();
   // Create starting position
   board[coordinatesToBoardIndex(0,0)] = new Piece(PieceType::P1_KING, KING_STARTING_HEALTH_POINTS, coordinatesToBoardIndex(0,0));
   board[coordinatesToBoardIndex(0,1)] = new Piece(PieceType::P1_PAWN, PAWN_STARTING_HEALTH_POINTS, coordinatesToBoardIndex(0,1));
@@ -340,7 +954,7 @@ Game::Game() {
 /*
  * Assumes that the move and ability are legal.
  */
-void Game::makeMoveAndAbility(int moveSrcIdx, int moveDstIdx, int abilitySrcIdx, int abilityDstIdx, std::vector<std::vector<int>>& squareToNeighboringSquares) {
+void Game::makeMoveAndAbility(int moveSrcIdx, int moveDstIdx, int abilitySrcIdx, int abilityDstIdx) {
   UndoInfo undoInfo = UndoInfo();
   undoInfo.moveSrcIdx = moveSrcIdx;
   undoInfo.moveDstIdx = moveDstIdx;
@@ -588,10 +1202,7 @@ void Game::undoMove(int moveSrcIdx, int moveDstIdx) {
   return;
 }
 
-std::vector<PlayerAction> Game::legalActions(
-    std::vector<std::vector<std::vector<PlayerMove>>>& pieceTypeToSquareIndexToLegalMoves,
-    std::vector<std::vector<std::vector<PlayerAbility>>>& pieceTypeToSquareIndexToLegalAbilities
-    ) {
+std::vector<PlayerAction> Game::legalActions() {
   std::vector<PlayerAction> retval;
   // If King is dead, game is over and there are no legal actions
   if(playerToPieces[currentPlayer][0]->healthPoints <= 0) {
@@ -1329,628 +1940,14 @@ Player Game::getCurrentPlayer() {
   return currentPlayer;
 }
 
-bool isOffBoard(int x, int y) {
-  if(x >= NUM_COLUMNS || x < 0 || y >= NUM_ROWS || y < 0)
-    return true;
-  else
-    return false;
-}
-
-/*
- * For each Piece type, for each square, returns legal moves as if there were no other
- * pieces on the board. Elsewhere, occupied squares will be discarded from the legal moves.
- */
-std::vector<std::vector<std::vector<PlayerMove>>> generateLegalMovesOnAnEmptyBoard() {
-  std::vector<std::vector<std::vector<PlayerMove>>> pieceTypeToSquareToLegalMoves{NUM_PIECE_TYPE};
-
-  // p1 king moves
-  std::vector<std::vector<PlayerMove>> squareToP1KingMoves{NUM_ROWS*NUM_COLUMNS};
-  for(int move_row = 0; move_row < NUM_ROWS; move_row++) {
-    for(int move_column = 0; move_column < NUM_COLUMNS; move_column++) {
-      int srcSquareIndex = coordinatesToBoardIndex(move_column, move_row);
-      std::vector<PlayerMove> playerMoves;
-      for(int dx = -1; dx < 2; dx++) {
-        for(int dy = -1; dy < 2; dy++) {
-          if(dx == 0 && dy == 0) continue;
-          int move_dst_x = move_column + dx;
-          int move_dst_y = move_row + dy;
-          if(isOffBoard(move_dst_x, move_dst_y)) continue;
-          PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x, move_dst_y));
-          playerMoves.push_back(pm);
-        }
-      }
-      squareToP1KingMoves[srcSquareIndex] = playerMoves;
-    }
-  }
-  pieceTypeToSquareToLegalMoves[P1_KING] = squareToP1KingMoves;
-
-  // p1 mage moves
-  std::vector<std::vector<PlayerMove>> squareToP1MageMoves{NUM_ROWS*NUM_COLUMNS};
-  for(int move_row = 0; move_row < NUM_ROWS; move_row++) {
-    for(int move_column = 0; move_column < NUM_COLUMNS; move_column++) {
-      int srcSquareIndex = coordinatesToBoardIndex(move_column, move_row);
-      std::vector<PlayerMove> playerMoves;
-      for(int dx = -1; dx < 2; dx++) {
-        for(int dy = -1; dy < 2; dy++) {
-          if(dx == 0 && dy == 0) continue;
-          int move_dst_x = move_column + dx;
-          int move_dst_y = move_row + dy;
-          if(isOffBoard(move_dst_x, move_dst_y)) continue;
-          PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x, move_dst_y));
-          playerMoves.push_back(pm);
-        }
-      }
-      squareToP1MageMoves[srcSquareIndex] = playerMoves;
-    }
-  }
-  pieceTypeToSquareToLegalMoves[P1_MAGE] = squareToP1MageMoves;
-
-  // p1 pawn moves
-  std::vector<std::vector<PlayerMove>> squareToP1PawnMoves{NUM_ROWS*NUM_COLUMNS};
-  for(int move_row = 0; move_row < NUM_ROWS; move_row++) {
-    for(int move_column = 0; move_column < NUM_COLUMNS; move_column++) {
-      int srcSquareIndex = coordinatesToBoardIndex(move_column, move_row);
-      std::vector<PlayerMove> playerMoves;
-      for(int dx = -1; dx < 2; dx++) {
-        for(int dy = -1; dy < 2; dy++) {
-          if(dx == 0 && dy == 0) continue;
-          int move_dst_x = move_column + dx;
-          int move_dst_y = move_row + dy;
-          if(isOffBoard(move_dst_x, move_dst_y)) continue;
-          PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x, move_dst_y));
-          playerMoves.push_back(pm);
-        }
-      }
-      // pawn can also go 2 squares forward
-      int move_dst_x = move_column;
-      int move_dst_y = move_row + 2;
-      if(!isOffBoard(move_dst_x, move_dst_y)){
-        PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x, move_dst_y));
-        playerMoves.push_back(pm);
-      }
-      squareToP1PawnMoves[srcSquareIndex] = playerMoves;
-    }
-  }
-  pieceTypeToSquareToLegalMoves[P1_PAWN] = squareToP1PawnMoves;
-
-  // p1 warrior moves
-  std::vector<std::vector<PlayerMove>> squareToP1WarriorMoves{NUM_ROWS*NUM_COLUMNS};
-  for(int move_row = 0; move_row < NUM_ROWS; move_row++) {
-    for(int move_column = 0; move_column < NUM_COLUMNS; move_column++) {
-      int srcSquareIndex = coordinatesToBoardIndex(move_column, move_row);
-      std::vector<PlayerMove> playerMoves;
-      for(int dx = -1; dx < 2; dx++) {
-        for(int dy = -1; dy < 2; dy++) {
-          if(dx == 0 && dy == 0) continue;
-          int move_dst_x = move_column + dx;
-          int move_dst_y = move_row + dy;
-          if(isOffBoard(move_dst_x, move_dst_y)) continue;
-          PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x, move_dst_y));
-          playerMoves.push_back(pm);
-        }
-      }
-      squareToP1WarriorMoves[srcSquareIndex] = playerMoves;
-    }
-  }
-  pieceTypeToSquareToLegalMoves[P1_WARRIOR] = squareToP1WarriorMoves;
-
-  // p1 wall moves
-  // walls can't move
-  std::vector<std::vector<PlayerMove>> squareToP1WallMoves{NUM_ROWS*NUM_COLUMNS};
-  for(int move_row = 0; move_row < NUM_ROWS; move_row++) {
-    for(int move_column = 0; move_column < NUM_COLUMNS; move_column++) {
-      int srcSquareIndex = coordinatesToBoardIndex(move_column, move_row);
-      std::vector<PlayerMove> playerMoves;
-      squareToP1WallMoves[srcSquareIndex] = playerMoves;
-    }
-  }
-  pieceTypeToSquareToLegalMoves[P1_WALL] = squareToP1WallMoves;
-
-  // p1 assassin moves
-  std::vector<std::vector<PlayerMove>> squareToP1AssassinMoves{NUM_ROWS*NUM_COLUMNS};
-  for(int move_row = 0; move_row < NUM_ROWS; move_row++) {
-    for(int move_column = 0; move_column < NUM_COLUMNS; move_column++) {
-      int srcSquareIndex = coordinatesToBoardIndex(move_column, move_row);
-      std::vector<PlayerMove> playerMoves;
-      for(int dx = -2; dx < 3; dx++) {
-        for(int dy = -2; dy < 3; dy++) {
-          if(dx == 0 && dy == 0) continue;
-          int move_dst_x = move_column + dx;
-          int move_dst_y = move_row + dy;
-          if(isOffBoard(move_dst_x, move_dst_y)) continue;
-          PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x, move_dst_y));
-          playerMoves.push_back(pm);
-        }
-      }
-      // 4 extra moves:
-      int move_dst_x1 = move_column + 3;
-      int move_dst_y1 = move_row + 3;
-      int move_dst_x2 = move_column + 3;
-      int move_dst_y2 = move_row - 3;
-      int move_dst_x3 = move_column - 3;
-      int move_dst_y3 = move_row + 3;
-      int move_dst_x4 = move_column - 3;
-      int move_dst_y4 = move_row - 3;
-      if(!isOffBoard(move_dst_x1, move_dst_y1)){
-        PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x1, move_dst_y1));
-        playerMoves.push_back(pm);
-      }
-      if(!isOffBoard(move_dst_x2, move_dst_y2)){
-        PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x2, move_dst_y2));
-        playerMoves.push_back(pm);
-      }
-      if(!isOffBoard(move_dst_x3, move_dst_y3)){
-        PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x3, move_dst_y3));
-        playerMoves.push_back(pm);
-      }
-      if(!isOffBoard(move_dst_x4, move_dst_y4)){
-        PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x4, move_dst_y4));
-        playerMoves.push_back(pm);
-      }
-
-      squareToP1AssassinMoves[srcSquareIndex] = playerMoves;
-    }
-  }
-  pieceTypeToSquareToLegalMoves[P1_ASSASSIN] = squareToP1AssassinMoves;
-
-  // p2 king moves
-  std::vector<std::vector<PlayerMove>> squareToP2KingMoves{NUM_ROWS*NUM_COLUMNS};
-  for(int move_row = 0; move_row < NUM_ROWS; move_row++) {
-    for(int move_column = 0; move_column < NUM_COLUMNS; move_column++) {
-      int srcSquareIndex = coordinatesToBoardIndex(move_column, move_row);
-      std::vector<PlayerMove> playerMoves;
-      for(int dx = -1; dx < 2; dx++) {
-        for(int dy = -1; dy < 2; dy++) {
-          if(dx == 0 && dy == 0) continue;
-          int move_dst_x = move_column + dx;
-          int move_dst_y = move_row + dy;
-          if(isOffBoard(move_dst_x, move_dst_y)) continue;
-          PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x, move_dst_y));
-          playerMoves.push_back(pm);
-        }
-      }
-      squareToP2KingMoves[srcSquareIndex] = playerMoves;
-    }
-  }
-  pieceTypeToSquareToLegalMoves[P2_KING] = squareToP2KingMoves;
-
-  // p2 mage moves
-  std::vector<std::vector<PlayerMove>> squareToP2MageMoves{NUM_ROWS*NUM_COLUMNS};
-  for(int move_row = 0; move_row < NUM_ROWS; move_row++) {
-    for(int move_column = 0; move_column < NUM_COLUMNS; move_column++) {
-      int srcSquareIndex = coordinatesToBoardIndex(move_column, move_row);
-      std::vector<PlayerMove> playerMoves;
-      for(int dx = -1; dx < 2; dx++) {
-        for(int dy = -1; dy < 2; dy++) {
-          if(dx == 0 && dy == 0) continue;
-          int move_dst_x = move_column + dx;
-          int move_dst_y = move_row + dy;
-          if(isOffBoard(move_dst_x, move_dst_y)) continue;
-          PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x, move_dst_y));
-          playerMoves.push_back(pm);
-        }
-      }
-      squareToP2MageMoves[srcSquareIndex] = playerMoves;
-    }
-  }
-  pieceTypeToSquareToLegalMoves[P2_MAGE] = squareToP2MageMoves;
-
-  // p2 pawn moves
-  std::vector<std::vector<PlayerMove>> squareToP2PawnMoves{NUM_ROWS*NUM_COLUMNS};
-  for(int move_row = 0; move_row < NUM_ROWS; move_row++) {
-    for(int move_column = 0; move_column < NUM_COLUMNS; move_column++) {
-      int srcSquareIndex = coordinatesToBoardIndex(move_column, move_row);
-      std::vector<PlayerMove> playerMoves;
-      for(int dx = -1; dx < 2; dx++) {
-        for(int dy = -1; dy < 2; dy++) {
-          if(dx == 0 && dy == 0) continue;
-          int move_dst_x = move_column + dx;
-          int move_dst_y = move_row + dy;
-          if(isOffBoard(move_dst_x, move_dst_y)) continue;
-          PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x, move_dst_y));
-          playerMoves.push_back(pm);
-        }
-      }
-      // pawn can also go 2 squares forward(for p2 this means -2 on y axis)
-      int move_dst_x = move_column;
-      int move_dst_y = move_row - 2;
-      if(!isOffBoard(move_dst_x, move_dst_y)){
-        PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x, move_dst_y));
-        playerMoves.push_back(pm);
-      }
-      squareToP2PawnMoves[srcSquareIndex] = playerMoves;
-    }
-  }
-  pieceTypeToSquareToLegalMoves[P2_PAWN] = squareToP2PawnMoves;
-
-  // p2 warrior moves
-  std::vector<std::vector<PlayerMove>> squareToP2WarriorMoves{NUM_ROWS*NUM_COLUMNS};
-  for(int move_row = 0; move_row < NUM_ROWS; move_row++) {
-    for(int move_column = 0; move_column < NUM_COLUMNS; move_column++) {
-      int srcSquareIndex = coordinatesToBoardIndex(move_column, move_row);
-      std::vector<PlayerMove> playerMoves;
-      for(int dx = -1; dx < 2; dx++) {
-        for(int dy = -1; dy < 2; dy++) {
-          if(dx == 0 && dy == 0) continue;
-          int move_dst_x = move_column + dx;
-          int move_dst_y = move_row + dy;
-          if(isOffBoard(move_dst_x, move_dst_y)) continue;
-          PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x, move_dst_y));
-          playerMoves.push_back(pm);
-        }
-      }
-      squareToP2WarriorMoves[srcSquareIndex] = playerMoves;
-    }
-  }
-  pieceTypeToSquareToLegalMoves[P2_WARRIOR] = squareToP2WarriorMoves;
-
-  // p2 wall moves
-  // walls can't move
-  std::vector<std::vector<PlayerMove>> squareToP2WallMoves{NUM_ROWS*NUM_COLUMNS};
-  for(int move_row = 0; move_row < NUM_ROWS; move_row++) {
-    for(int move_column = 0; move_column < NUM_COLUMNS; move_column++) {
-      int srcSquareIndex = coordinatesToBoardIndex(move_column, move_row);
-      std::vector<PlayerMove> playerMoves;
-      squareToP2WallMoves[srcSquareIndex] = playerMoves;
-    }
-  }
-  pieceTypeToSquareToLegalMoves[P2_WALL] = squareToP2WallMoves;
-
-  // p2 assassin moves
-  std::vector<std::vector<PlayerMove>> squareToP2AssassinMoves{NUM_ROWS*NUM_COLUMNS};
-  for(int move_row = 0; move_row < NUM_ROWS; move_row++) {
-    for(int move_column = 0; move_column < NUM_COLUMNS; move_column++) {
-      int srcSquareIndex = coordinatesToBoardIndex(move_column, move_row);
-      std::vector<PlayerMove> playerMoves;
-      for(int dx = -2; dx < 3; dx++) {
-        for(int dy = -2; dy < 3; dy++) {
-          if(dx == 0 && dy == 0) continue;
-          int move_dst_x = move_column + dx;
-          int move_dst_y = move_row + dy;
-          if(isOffBoard(move_dst_x, move_dst_y)) continue;
-          PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x, move_dst_y));
-          playerMoves.push_back(pm);
-        }
-      }
-      // 4 extra moves:
-      int move_dst_x1 = move_column + 3;
-      int move_dst_y1 = move_row + 3;
-      int move_dst_x2 = move_column + 3;
-      int move_dst_y2 = move_row - 3;
-      int move_dst_x3 = move_column - 3;
-      int move_dst_y3 = move_row + 3;
-      int move_dst_x4 = move_column - 3;
-      int move_dst_y4 = move_row - 3;
-      if(!isOffBoard(move_dst_x1, move_dst_y1)){
-        PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x1, move_dst_y1));
-        playerMoves.push_back(pm);
-      }
-      if(!isOffBoard(move_dst_x2, move_dst_y2)){
-        PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x2, move_dst_y2));
-        playerMoves.push_back(pm);
-      }
-      if(!isOffBoard(move_dst_x3, move_dst_y3)){
-        PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x3, move_dst_y3));
-        playerMoves.push_back(pm);
-      }
-      if(!isOffBoard(move_dst_x4, move_dst_y4)){
-        PlayerMove pm = PlayerMove(srcSquareIndex, coordinatesToBoardIndex(move_dst_x4, move_dst_y4));
-        playerMoves.push_back(pm);
-      }
-
-      squareToP2AssassinMoves[srcSquareIndex] = playerMoves;
-    }
-  }
-  pieceTypeToSquareToLegalMoves[P2_ASSASSIN] = squareToP2AssassinMoves;
-
-  // NO_PIECE moves (shouldn't be used, added for completeness)
-  std::vector<std::vector<PlayerMove>> squareToNoPieceMoves{NUM_ROWS*NUM_COLUMNS};
-  for(int move_row = 0; move_row < NUM_ROWS; move_row++) {
-    for(int move_column = 0; move_column < NUM_COLUMNS; move_column++) {
-      int srcSquareIndex = coordinatesToBoardIndex(move_column, move_row);
-      std::vector<PlayerMove> playerMoves;
-      squareToNoPieceMoves[srcSquareIndex] = playerMoves;
-    }
-  }
-  pieceTypeToSquareToLegalMoves[NO_PIECE] = squareToNoPieceMoves;
-
-  return pieceTypeToSquareToLegalMoves;
-}
-
-/*
- * For each Piece type, for each square, returns legal abilities as if there were no other
- * pieces on the board. Elsewhere, abilities will be filtered by the actual board position.
- */
-std::vector<std::vector<std::vector<PlayerAbility>>> generateLegalAbilitiesOnAnEmptyBoard() {
-  std::vector<std::vector<std::vector<PlayerAbility>>> pieceTypeToSquareToLegalAbilities{NUM_PIECE_TYPE};
-
-  // p1 king abilities
-  std::vector<std::vector<PlayerAbility>> squareToP1KingAbilities{NUM_ROWS*NUM_COLUMNS};
-  for(int ability_row = 0; ability_row < NUM_ROWS; ability_row++) {
-    for(int ability_column = 0; ability_column < NUM_COLUMNS; ability_column++) {
-      int srcSquareIndex = coordinatesToBoardIndex(ability_column, ability_row);
-      std::vector<PlayerAbility> playerAbilities;
-      for(int dx = -1; dx < 2; dx++) {
-        for(int dy = -1; dy < 2; dy++) {
-          if(dx == 0 && dy == 0) continue;
-          int ability_dst_x = ability_column + dx;
-          int ability_dst_y = ability_row + dy;
-          if(isOffBoard(ability_dst_x, ability_dst_y)) continue;
-          PlayerAbility pa = PlayerAbility(srcSquareIndex, coordinatesToBoardIndex(ability_dst_x, ability_dst_y));
-          playerAbilities.push_back(pa);
-        }
-      }
-      squareToP1KingAbilities[srcSquareIndex] = playerAbilities;
-    }
-  }
-  pieceTypeToSquareToLegalAbilities[P1_KING] = squareToP1KingAbilities;
-
-  // p1 mage abilities
-  std::vector<std::vector<PlayerAbility>> squareToP1MageAbilities{NUM_ROWS*NUM_COLUMNS};
-  for(int ability_row = 0; ability_row < NUM_ROWS; ability_row++) {
-    for(int ability_column = 0; ability_column < NUM_COLUMNS; ability_column++) {
-      int srcSquareIndex = coordinatesToBoardIndex(ability_column, ability_row);
-      std::vector<PlayerAbility> playerAbilities;
-      for(int dx = -2; dx < 3; dx++) {
-        for(int dy = -2; dy < 3; dy++) {
-          if(dx == 0 && dy == 0) continue;
-          int ability_dst_x = ability_column + dx;
-          int ability_dst_y = ability_row + dy;
-          if(isOffBoard(ability_dst_x, ability_dst_y)) continue;
-          PlayerAbility pa = PlayerAbility(srcSquareIndex, coordinatesToBoardIndex(ability_dst_x, ability_dst_y));
-          playerAbilities.push_back(pa);
-        }
-      }
-      squareToP1MageAbilities[srcSquareIndex] = playerAbilities;
-    }
-  }
-  pieceTypeToSquareToLegalAbilities[P1_MAGE] = squareToP1MageAbilities;
-
-  // p1 pawn abilities
-  std::vector<std::vector<PlayerAbility>> squareToP1PawnAbilities{NUM_ROWS*NUM_COLUMNS};
-  for(int ability_row = 0; ability_row < NUM_ROWS; ability_row++) {
-    for(int ability_column = 0; ability_column < NUM_COLUMNS; ability_column++) {
-      int srcSquareIndex = coordinatesToBoardIndex(ability_column, ability_row);
-      std::vector<PlayerAbility> playerAbilities;
-      for(int dx = -1; dx < 2; dx++) {
-        for(int dy = -1; dy < 2; dy++) {
-          if(dx == 0 && dy == 0) continue;
-          int ability_dst_x = ability_column + dx;
-          int ability_dst_y = ability_row + dy;
-          if(isOffBoard(ability_dst_x, ability_dst_y)) continue;
-          PlayerAbility pa = PlayerAbility(srcSquareIndex, coordinatesToBoardIndex(ability_dst_x, ability_dst_y));
-          playerAbilities.push_back(pa);
-        }
-      }
-      squareToP1PawnAbilities[srcSquareIndex] = playerAbilities;
-    }
-  }
-  pieceTypeToSquareToLegalAbilities[P1_PAWN] = squareToP1PawnAbilities;
-
-  // p1 warrior abilities
-  std::vector<std::vector<PlayerAbility>> squareToP1WarriorAbilities{NUM_ROWS*NUM_COLUMNS};
-  for(int ability_row = 0; ability_row < NUM_ROWS; ability_row++) {
-    for(int ability_column = 0; ability_column < NUM_COLUMNS; ability_column++) {
-      int srcSquareIndex = coordinatesToBoardIndex(ability_column, ability_row);
-      std::vector<PlayerAbility> playerAbilities;
-      for(int dx = -1; dx < 2; dx++) {
-        for(int dy = -1; dy < 2; dy++) {
-          if(dx == 0 && dy == 0) continue;
-          int ability_dst_x = ability_column + dx;
-          int ability_dst_y = ability_row + dy;
-          if(isOffBoard(ability_dst_x, ability_dst_y)) continue;
-          PlayerAbility pa = PlayerAbility(srcSquareIndex, coordinatesToBoardIndex(ability_dst_x, ability_dst_y));
-          playerAbilities.push_back(pa);
-        }
-      }
-      squareToP1WarriorAbilities[srcSquareIndex] = playerAbilities;
-    }
-  }
-  pieceTypeToSquareToLegalAbilities[P1_WARRIOR] = squareToP1WarriorAbilities;
-
-  // p1 wall abilities
-  // walls can't ability
-  std::vector<std::vector<PlayerAbility>> squareToP1WallAbilities{NUM_ROWS*NUM_COLUMNS};
-  for(int ability_row = 0; ability_row < NUM_ROWS; ability_row++) {
-    for(int ability_column = 0; ability_column < NUM_COLUMNS; ability_column++) {
-      int srcSquareIndex = coordinatesToBoardIndex(ability_column, ability_row);
-      std::vector<PlayerAbility> playerAbilities;
-      squareToP1WallAbilities[srcSquareIndex] = playerAbilities;
-    }
-  }
-  pieceTypeToSquareToLegalAbilities[P1_WALL] = squareToP1WallAbilities;
-
-  // p1 assassin abilities
-  std::vector<std::vector<PlayerAbility>> squareToP1AssassinAbilities{NUM_ROWS*NUM_COLUMNS};
-  for(int ability_row = 0; ability_row < NUM_ROWS; ability_row++) {
-    for(int ability_column = 0; ability_column < NUM_COLUMNS; ability_column++) {
-      int srcSquareIndex = coordinatesToBoardIndex(ability_column, ability_row);
-      std::vector<PlayerAbility> playerAbilities;
-      for(int dx = -1; dx < 2; dx++) {
-        for(int dy = -1; dy < 2; dy++) {
-          if(dx == 0 && dy == 0) continue;
-          int ability_dst_x = ability_column + dx;
-          int ability_dst_y = ability_row + dy;
-          if(isOffBoard(ability_dst_x, ability_dst_y)) continue;
-          PlayerAbility pa = PlayerAbility(srcSquareIndex, coordinatesToBoardIndex(ability_dst_x, ability_dst_y));
-          playerAbilities.push_back(pa);
-        }
-      }
-      squareToP1AssassinAbilities[srcSquareIndex] = playerAbilities;
-    }
-  }
-  pieceTypeToSquareToLegalAbilities[P1_ASSASSIN] = squareToP1AssassinAbilities;
-
-  // p2 king abilities
-  std::vector<std::vector<PlayerAbility>> squareToP2KingAbilities{NUM_ROWS*NUM_COLUMNS};
-  for(int ability_row = 0; ability_row < NUM_ROWS; ability_row++) {
-    for(int ability_column = 0; ability_column < NUM_COLUMNS; ability_column++) {
-      int srcSquareIndex = coordinatesToBoardIndex(ability_column, ability_row);
-      std::vector<PlayerAbility> playerAbilities;
-      for(int dx = -1; dx < 2; dx++) {
-        for(int dy = -1; dy < 2; dy++) {
-          if(dx == 0 && dy == 0) continue;
-          int ability_dst_x = ability_column + dx;
-          int ability_dst_y = ability_row + dy;
-          if(isOffBoard(ability_dst_x, ability_dst_y)) continue;
-          PlayerAbility pa = PlayerAbility(srcSquareIndex, coordinatesToBoardIndex(ability_dst_x, ability_dst_y));
-          playerAbilities.push_back(pa);
-        }
-      }
-      squareToP2KingAbilities[srcSquareIndex] = playerAbilities;
-    }
-  }
-  pieceTypeToSquareToLegalAbilities[P2_KING] = squareToP2KingAbilities;
-
-  // p2 mage abilities
-  std::vector<std::vector<PlayerAbility>> squareToP2MageAbilities{NUM_ROWS*NUM_COLUMNS};
-  for(int ability_row = 0; ability_row < NUM_ROWS; ability_row++) {
-    for(int ability_column = 0; ability_column < NUM_COLUMNS; ability_column++) {
-      int srcSquareIndex = coordinatesToBoardIndex(ability_column, ability_row);
-      std::vector<PlayerAbility> playerAbilities;
-      for(int dx = -2; dx < 3; dx++) {
-        for(int dy = -2; dy < 3; dy++) {
-          if(dx == 0 && dy == 0) continue;
-          int ability_dst_x = ability_column + dx;
-          int ability_dst_y = ability_row + dy;
-          if(isOffBoard(ability_dst_x, ability_dst_y)) continue;
-          PlayerAbility pa = PlayerAbility(srcSquareIndex, coordinatesToBoardIndex(ability_dst_x, ability_dst_y));
-          playerAbilities.push_back(pa);
-        }
-      }
-      squareToP2MageAbilities[srcSquareIndex] = playerAbilities;
-    }
-  }
-  pieceTypeToSquareToLegalAbilities[P2_MAGE] = squareToP2MageAbilities;
-
-  // p2 pawn abilities
-  std::vector<std::vector<PlayerAbility>> squareToP2PawnAbilities{NUM_ROWS*NUM_COLUMNS};
-  for(int ability_row = 0; ability_row < NUM_ROWS; ability_row++) {
-    for(int ability_column = 0; ability_column < NUM_COLUMNS; ability_column++) {
-      int srcSquareIndex = coordinatesToBoardIndex(ability_column, ability_row);
-      std::vector<PlayerAbility> playerAbilities;
-      for(int dx = -1; dx < 2; dx++) {
-        for(int dy = -1; dy < 2; dy++) {
-          if(dx == 0 && dy == 0) continue;
-          int ability_dst_x = ability_column + dx;
-          int ability_dst_y = ability_row + dy;
-          if(isOffBoard(ability_dst_x, ability_dst_y)) continue;
-          PlayerAbility pa = PlayerAbility(srcSquareIndex, coordinatesToBoardIndex(ability_dst_x, ability_dst_y));
-          playerAbilities.push_back(pa);
-        }
-      }
-      squareToP2PawnAbilities[srcSquareIndex] = playerAbilities;
-    }
-  }
-  pieceTypeToSquareToLegalAbilities[P2_PAWN] = squareToP2PawnAbilities;
-
-  // p2 warrior abilities
-  std::vector<std::vector<PlayerAbility>> squareToP2WarriorAbilities{NUM_ROWS*NUM_COLUMNS};
-  for(int ability_row = 0; ability_row < NUM_ROWS; ability_row++) {
-    for(int ability_column = 0; ability_column < NUM_COLUMNS; ability_column++) {
-      int srcSquareIndex = coordinatesToBoardIndex(ability_column, ability_row);
-      std::vector<PlayerAbility> playerAbilities;
-      for(int dx = -1; dx < 2; dx++) {
-        for(int dy = -1; dy < 2; dy++) {
-          if(dx == 0 && dy == 0) continue;
-          int ability_dst_x = ability_column + dx;
-          int ability_dst_y = ability_row + dy;
-          if(isOffBoard(ability_dst_x, ability_dst_y)) continue;
-          PlayerAbility pa = PlayerAbility(srcSquareIndex, coordinatesToBoardIndex(ability_dst_x, ability_dst_y));
-          playerAbilities.push_back(pa);
-        }
-      }
-      squareToP2WarriorAbilities[srcSquareIndex] = playerAbilities;
-    }
-  }
-  pieceTypeToSquareToLegalAbilities[P2_WARRIOR] = squareToP2WarriorAbilities;
-
-  // p2 wall abilities
-  // walls can't ability
-  std::vector<std::vector<PlayerAbility>> squareToP2WallAbilities{NUM_ROWS*NUM_COLUMNS};
-  for(int ability_row = 0; ability_row < NUM_ROWS; ability_row++) {
-    for(int ability_column = 0; ability_column < NUM_COLUMNS; ability_column++) {
-      int srcSquareIndex = coordinatesToBoardIndex(ability_column, ability_row);
-      std::vector<PlayerAbility> playerAbilities;
-      squareToP2WallAbilities[srcSquareIndex] = playerAbilities;
-    }
-  }
-  pieceTypeToSquareToLegalAbilities[P2_WALL] = squareToP2WallAbilities;
-
-  // p2 assassin abilities
-  std::vector<std::vector<PlayerAbility>> squareToP2AssassinAbilities{NUM_ROWS*NUM_COLUMNS};
-  for(int ability_row = 0; ability_row < NUM_ROWS; ability_row++) {
-    for(int ability_column = 0; ability_column < NUM_COLUMNS; ability_column++) {
-      int srcSquareIndex = coordinatesToBoardIndex(ability_column, ability_row);
-      std::vector<PlayerAbility> playerAbilities;
-      for(int dx = -1; dx < 2; dx++) {
-        for(int dy = -1; dy < 2; dy++) {
-          if(dx == 0 && dy == 0) continue;
-          int ability_dst_x = ability_column + dx;
-          int ability_dst_y = ability_row + dy;
-          if(isOffBoard(ability_dst_x, ability_dst_y)) continue;
-          PlayerAbility pa = PlayerAbility(srcSquareIndex, coordinatesToBoardIndex(ability_dst_x, ability_dst_y));
-          playerAbilities.push_back(pa);
-        }
-      }
-      squareToP2AssassinAbilities[srcSquareIndex] = playerAbilities;
-    }
-  }
-  pieceTypeToSquareToLegalAbilities[P2_ASSASSIN] = squareToP2AssassinAbilities;
-
-  // NO_PIECE abilities
-  std::vector<std::vector<PlayerAbility>> squareToNoPieceAbilities{NUM_ROWS*NUM_COLUMNS};
-  for(int ability_row = 0; ability_row < NUM_ROWS; ability_row++) {
-    for(int ability_column = 0; ability_column < NUM_COLUMNS; ability_column++) {
-      int srcSquareIndex = coordinatesToBoardIndex(ability_column, ability_row);
-      std::vector<PlayerAbility> playerAbilities;
-      squareToNoPieceAbilities[srcSquareIndex] = playerAbilities;
-    }
-  }
-  pieceTypeToSquareToLegalAbilities[NO_PIECE] = squareToNoPieceAbilities;
-
-
-  return pieceTypeToSquareToLegalAbilities;
-}
-
-/*
- * For index of each square, finds indices of squares that are touching it.
- * Used for mage ability.
- */
-std::vector<std::vector<int>> generateSquareToNeighboringSquares() {
-  std::vector<std::vector<int>> squareToNeighboringSquares{NUM_ROWS * NUM_COLUMNS};
-  for(int srcY = 0; srcY < NUM_ROWS; srcY++) {
-    for(int srcX = 0; srcX < NUM_COLUMNS; srcX++) {
-      std::vector<int> neighboringSquares;
-      int srcIndex = coordinatesToBoardIndex(srcX, srcY);
-      for(int k = -1; k < 2; k++) {
-        for(int l = -1; l < 2; l++) {
-          if(k == 0 && l == 0) continue;
-          int newX = srcX + k;
-          int newY = srcY + l;
-          if(isOffBoard(newX, newY)) continue;
-          int newIndex = coordinatesToBoardIndex(newX, newY);
-          neighboringSquares.push_back(newIndex);
-        }
-      }
-      squareToNeighboringSquares[srcIndex] = neighboringSquares;  
-    }
-  }
-  return squareToNeighboringSquares;
-}
-
 /* 
  * performance test - https://www.chessprogramming.org/Perft
  * with bulk counting
  */
-unsigned long long perft(Game& game, int depth,
-        std::vector<std::vector<std::vector<PlayerMove>>>& pieceTypeToSquareIndexToLegalMoves,
-        std::vector<std::vector<std::vector<PlayerAbility>>>& pieceTypeToSquareIndexToLegalAbilities,
-        std::vector<std::vector<int>>& squareToNeighboringSquares
-    ) {
+unsigned long long perft(Game& game, int depth) {
   std::vector<PlayerAction> legalActions;
   unsigned long long nodes = 0;
-  legalActions = game.legalActions(pieceTypeToSquareIndexToLegalMoves, pieceTypeToSquareIndexToLegalAbilities);
+  legalActions = game.legalActions();
   int numLegalActions = legalActions.size();
   if(depth == 1) {
     return (unsigned long long) numLegalActions;
@@ -1959,8 +1956,8 @@ unsigned long long perft(Game& game, int depth,
     if(depth == 3)
       std::cout << i << " / " << numLegalActions <<  "\n";
     PlayerAction pa = legalActions[i];
-    game.makeMoveAndAbility(pa.moveSrcIdx, pa.moveDstIdx, pa.abilitySrcIdx, pa.abilityDstIdx, squareToNeighboringSquares);
-    nodes += perft(game, depth-1, pieceTypeToSquareIndexToLegalMoves, pieceTypeToSquareIndexToLegalAbilities, squareToNeighboringSquares);
+    game.makeMoveAndAbility(pa.moveSrcIdx, pa.moveDstIdx, pa.abilitySrcIdx, pa.abilityDstIdx);
+    nodes += perft(game, depth-1);
     game.undoLastMoveAndAbility();
   }
 
@@ -1972,14 +1969,10 @@ unsigned long long perft(Game& game, int depth,
 
 int main() {
   Game g = Game();
-  auto pttstlm = generateLegalMovesOnAnEmptyBoard();
-  auto pttstla = generateLegalAbilitiesOnAnEmptyBoard();
-  auto stns = generateSquareToNeighboringSquares();
-
   std::cout << "Calculating number of nodes at depth 3\n";
   std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
-  unsigned long long nodes = perft(g, 3, pttstlm, pttstla, stns);
+  unsigned long long nodes = perft(g, 3);
   std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
   std::cout << "Total number of nodes at depth 3: " << nodes << "\n";
   std::cout << "Calculating time: " << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() << "[s]" << std::endl;

@@ -98,18 +98,17 @@ class Game {
     Player currentPlayer;
     UndoInfo moveNumberToUndoInfo[300];
     int moveNumber;
+    std::vector<std::vector<std::vector<PlayerMove>>> pieceTypeToSquareIndexToLegalMoves;
+    std::vector<std::vector<std::vector<PlayerAbility>>> pieceTypeToSquareIndexToLegalAbilities;
+    std::vector<std::vector<int>> squareToNeighboringSquares;
 
   public:
     Game();
     void makeMove(int moveSrcIdx, int moveDstIdx);
     void undoMove(int moveSrcIdx, int moveDstIdx);
-    void makeMoveAndAbility(int moveSrcIdx, int moveDstIdx, int abilitySrcIdx, int abilityDstIdx,
-      std::vector<std::vector<int>>& squareToNeighboringSquares);
+    void makeMoveAndAbility(int moveSrcIdx, int moveDstIdx, int abilitySrcIdx, int abilityDstIdx);
     void undoLastMoveAndAbility();
-    std::vector<PlayerAction> legalActions(
-        std::vector<std::vector<std::vector<PlayerMove>>>& pieceTypeToSquareIndexToLegalMoves,
-        std::vector<std::vector<std::vector<PlayerAbility>>>& pieceTypeToSquareIndexToLegalAbilities
-        );
+    std::vector<PlayerAction> legalActions();
     Player getCurrentPlayer();
     void print();
 };
