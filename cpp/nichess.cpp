@@ -954,7 +954,7 @@ Game::Game() {
 /*
  * Assumes that the move and ability are legal.
  */
-void Game::makeMoveAndAbility(int moveSrcIdx, int moveDstIdx, int abilitySrcIdx, int abilityDstIdx) {
+void Game::makeAction(int moveSrcIdx, int moveDstIdx, int abilitySrcIdx, int abilityDstIdx) {
   UndoInfo undoInfo = UndoInfo();
   undoInfo.moveSrcIdx = moveSrcIdx;
   undoInfo.moveDstIdx = moveDstIdx;
@@ -1107,7 +1107,7 @@ void Game::makeMoveAndAbility(int moveSrcIdx, int moveDstIdx, int abilitySrcIdx,
   return;
 }
 
-void Game::undoLastMoveAndAbility() {
+void Game::undoLastAction() {
   UndoInfo undoInfo = this->moveNumberToUndoInfo[this->moveNumber - 1];
   // undo ability
   switch(undoInfo.abilityType) {
@@ -1956,9 +1956,9 @@ unsigned long long perft(Game& game, int depth) {
     if(depth == 3)
       std::cout << i << " / " << numLegalActions <<  "\n";
     PlayerAction pa = legalActions[i];
-    game.makeMoveAndAbility(pa.moveSrcIdx, pa.moveDstIdx, pa.abilitySrcIdx, pa.abilityDstIdx);
+    game.makeAction(pa.moveSrcIdx, pa.moveDstIdx, pa.abilitySrcIdx, pa.abilityDstIdx);
     nodes += perft(game, depth-1);
-    game.undoLastMoveAndAbility();
+    game.undoLastAction();
   }
 
   return nodes;
@@ -2030,9 +2030,9 @@ int main() {
 
     if(x1 == -2 || x2 == -2 || x3 == -2 || x4 == -2 
         || y1 == -2 || y2 == -2 || y3 == -2 || y4 == -2) { // TODO: testing, delete when done.
-      g.undoLastMoveAndAbility();
+      g.undoLastAction();
     } else {
-      g.makeMoveAndAbility(moveSrcIdx, moveDstIdx, abilitySrcIdx, abilityDstIdx, stns);
+      g.makeAction(moveSrcIdx, moveDstIdx, abilitySrcIdx, abilityDstIdx, stns);
     }
     std::cout << "--------------------\n";
   }

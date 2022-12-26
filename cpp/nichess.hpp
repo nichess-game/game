@@ -106,8 +106,8 @@ class Game {
     Game();
     void makeMove(int moveSrcIdx, int moveDstIdx);
     void undoMove(int moveSrcIdx, int moveDstIdx);
-    void makeMoveAndAbility(int moveSrcIdx, int moveDstIdx, int abilitySrcIdx, int abilityDstIdx);
-    void undoLastMoveAndAbility();
+    void makeAction(int moveSrcIdx, int moveDstIdx, int abilitySrcIdx, int abilityDstIdx);
+    void undoLastAction();
     std::vector<PlayerAction> legalActions();
     Player getCurrentPlayer();
     void print();
