@@ -1,6 +1,7 @@
 #pragma once 
 
 #include <vector>
+#include <optional>
 
 namespace nichess {
 
@@ -111,8 +112,14 @@ class Game {
     std::vector<PlayerAction> legalActions();
     std::vector<PlayerMove> legalMovesByPiece(int srcSquareIdx);
     std::vector<PlayerAbility> usefulLegalAbilitiesByPiece(int srcSquareIdx);
+    std::vector<PlayerAbility> allLegalAbilitiesByPiece(int srcSquareIdx);
     Player getCurrentPlayer();
+    Piece getPieceByCoordinates(int x, int y);
+    Piece getPieceBySquareIndex(int squareIndex);
+    bool gameOver();
+    std::optional<Player> winner();
     void print();
+    void reset();
 };
 
 } // namespace nichess

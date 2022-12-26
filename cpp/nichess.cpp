@@ -880,13 +880,9 @@ std::vector<std::vector<int>> generateSquareToNeighboringSquares() {
   return squareToNeighboringSquares;
 }
 
-
-Game::Game() {
+void Game::reset() {
   moveNumber = 0;
   currentPlayer = Player::PLAYER_1;
-  pieceTypeToSquareIndexToLegalMoves = generateLegalMovesOnAnEmptyBoard();
-  pieceTypeToSquareIndexToLegalAbilities = generateLegalAbilitiesOnAnEmptyBoard();
-  squareToNeighboringSquares = generateSquareToNeighboringSquares();
   // Create starting position
   board[coordinatesToBoardIndex(0,0)] = new Piece(PieceType::P1_KING, KING_STARTING_HEALTH_POINTS, coordinatesToBoardIndex(0,0));
   board[coordinatesToBoardIndex(0,1)] = new Piece(PieceType::P1_PAWN, PAWN_STARTING_HEALTH_POINTS, coordinatesToBoardIndex(0,1));
@@ -981,6 +977,14 @@ Game::Game() {
   p2Pieces[5] = board[coordinatesToBoardIndex(2,6)];
   p2Pieces[6] = board[coordinatesToBoardIndex(3,6)];
   playerToPieces[Player::PLAYER_2] = p2Pieces;
+}
+
+
+Game::Game() {
+  pieceTypeToSquareIndexToLegalMoves = generateLegalMovesOnAnEmptyBoard();
+  pieceTypeToSquareIndexToLegalAbilities = generateLegalAbilitiesOnAnEmptyBoard();
+  squareToNeighboringSquares = generateSquareToNeighboringSquares();
+  reset();
 }
 
 /*
@@ -1612,6 +1616,20 @@ std::vector<PlayerAbility> Game::usefulLegalAbilitiesByPiece(int srcSquareIdx) {
     }
     retval.push_back(currentAbility);
   }
+  return retval;
+}
+
+/*
+ * Assumes that the game is not over.
+ */
+std::vector<PlayerAbility> Game::allLegalAbilitiesByPiece(int srcSquareIdx) {
+  std::vector<PlayerAbility> retval;
+  Piece* piece = board[srcSquareIdx];
+  if((!pieceBelongsToPlayer(piece->type, currentPlayer)) ||
+      piece->healthPoints <= 0) {
+    return retval;
+  }
+  retval = pieceTypeToSquareIndexToLegalAbilities[piece->type][piece->squareIndex];
   return retval;
 }
 
@@ -2354,6 +2372,31 @@ Player Game::getCurrentPlayer() {
   return currentPlayer;
 }
 
+Piece Game::getPieceByCoordinates(int x, int y) {
+  return *board[coordinatesToBoardIndex(x, y)]; 
+}
+
+Piece Game::getPieceBySquareIndex(int squareIndex) {
+  return *board[squareIndex]; 
+}
+
+bool Game::gameOver() {
+  if(p1King->healthPoints <= 0 || p2King->healthPoints <= 0) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+std::optional<Player> Game::winner() {
+  if(p1King->healthPoints <= 0) {
+    return PLAYER_2;
+  } else if(p2King->healthPoints <= 0) {
+    return PLAYER_1;
+  }
+  return std::nullopt;
+}
+
 /* 
  * performance test - https://www.chessprogramming.org/Perft
  * with bulk counting
@@ -2390,11 +2433,17 @@ int main() {
     std::cin >> pieceX;
     std::cout << "Enter piece's y coordinate:\n";
     std::cin >> pieceY;
-    auto legalAbilities = g.usefulLegalAbilitiesByPiece(coordinatesToBoardIndex(pieceX, pieceY));
-    std::cout << "Useful legal abilities:\n";
+    auto legalAbilities = g.allLegalAbilitiesByPiece(coordinatesToBoardIndex(pieceX, pieceY));
+    std::cout << "all legal abilities:\n";
     for(int i = 0; i < legalAbilities.size(); i++) {
       legalAbilities[i].print();
     }
+    bool gameOver = g.gameOver();
+    std::optional<Player> winner = g.winner();
+    std::cout << "gameOver: " << gameOver << "\n";
+    if(winner)
+      std::cout << "winner: " << *winner << "\n";
+
   }
 
   /*

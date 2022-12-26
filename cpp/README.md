@@ -1,4 +1,8 @@
-Learning C++ as I go.
+Requires C++17 or later. Compile with:
+
+```
+g++ nichess.cpp -std=c++17
+```
 
 Using 8x8 array representation, also known as "mailbox". Once baseline implementation is
 finished, I'll try to improve it with bitboards.
