@@ -989,6 +989,9 @@ Game::Game() {
 
 /*
  * Assumes that the move and ability are legal.
+ * If the ability is not useful (i.e. does not alter the game state), it's converted to
+ * AbilityType::NO_ABILITY.
+ * Checking whether ability is useful makes the function ~1.5% slower.
  */
 void Game::makeAction(int moveSrcIdx, int moveDstIdx, int abilitySrcIdx, int abilityDstIdx) {
   UndoInfo undoInfo = UndoInfo();
@@ -1007,6 +1010,10 @@ void Game::makeAction(int moveSrcIdx, int moveDstIdx, int abilitySrcIdx, int abi
     switch(abilitySrcPiece->type) {
       // king does single target damage
       case P1_KING:
+        if(player1OrEmpty(abilityDstPiece->type)) {
+          undoInfo.abilityType = AbilityType::NO_ABILITY;
+          break;
+        }
         abilityDstPiece->healthPoints -= KING_ABILITY_POINTS;
         undoInfo.abilityType = AbilityType::KING_DAMAGE;
         undoInfo.affectedPieces[0] = abilityDstPiece;
@@ -1016,6 +1023,10 @@ void Game::makeAction(int moveSrcIdx, int moveDstIdx, int abilitySrcIdx, int abi
         break;
       // mage damages attacked piece and all enemy pieces that are touching it
       case P1_MAGE:
+        if(player1OrEmpty(abilityDstPiece->type)) {
+          undoInfo.abilityType = AbilityType::NO_ABILITY;
+          break;
+        }
         abilityDstPiece->healthPoints -= MAGE_ABILITY_POINTS;
         undoInfo.abilityType = AbilityType::MAGE_DAMAGE;
         undoInfo.affectedPieces[0] = abilityDstPiece;
@@ -1053,6 +1064,10 @@ void Game::makeAction(int moveSrcIdx, int moveDstIdx, int abilitySrcIdx, int abi
         }
         break;
       case P1_WARRIOR:
+        if(player1OrEmpty(abilityDstPiece->type)) {
+          undoInfo.abilityType = AbilityType::NO_ABILITY;
+          break;
+        }
         abilityDstPiece->healthPoints -= WARRIOR_ABILITY_POINTS;
         undoInfo.abilityType = AbilityType::WARRIOR_DAMAGE;
         undoInfo.affectedPieces[0] = abilityDstPiece;
@@ -1063,6 +1078,10 @@ void Game::makeAction(int moveSrcIdx, int moveDstIdx, int abilitySrcIdx, int abi
       case P1_WALL:
         break;
       case P1_ASSASSIN:
+        if(player1OrEmpty(abilityDstPiece->type)) {
+          undoInfo.abilityType = AbilityType::NO_ABILITY;
+          break;
+        }
         abilityDstPiece->healthPoints -= ASSASSIN_ABILITY_POINTS;
         undoInfo.abilityType = AbilityType::ASSASSIN_DAMAGE;
         undoInfo.affectedPieces[0] = abilityDstPiece;
@@ -1071,6 +1090,10 @@ void Game::makeAction(int moveSrcIdx, int moveDstIdx, int abilitySrcIdx, int abi
         }
         break;
       case P2_KING:
+        if(player2OrEmpty(abilityDstPiece->type)) {
+          undoInfo.abilityType = AbilityType::NO_ABILITY;
+          break;
+        }
         abilityDstPiece->healthPoints -= KING_ABILITY_POINTS;
         undoInfo.abilityType = AbilityType::KING_DAMAGE;
         undoInfo.affectedPieces[0] = abilityDstPiece;
@@ -1079,6 +1102,10 @@ void Game::makeAction(int moveSrcIdx, int moveDstIdx, int abilitySrcIdx, int abi
         }
         break;
       case P2_MAGE:
+        if(player2OrEmpty(abilityDstPiece->type)) {
+          undoInfo.abilityType = AbilityType::NO_ABILITY;
+          break;
+        }
         abilityDstPiece->healthPoints -= MAGE_ABILITY_POINTS;
         undoInfo.abilityType = AbilityType::MAGE_DAMAGE;
         undoInfo.affectedPieces[0] = abilityDstPiece;
@@ -1116,6 +1143,10 @@ void Game::makeAction(int moveSrcIdx, int moveDstIdx, int abilitySrcIdx, int abi
         }
         break;
       case P2_WARRIOR:
+        if(player2OrEmpty(abilityDstPiece->type)) {
+          undoInfo.abilityType = AbilityType::NO_ABILITY;
+          break;
+        }
         abilityDstPiece->healthPoints -= WARRIOR_ABILITY_POINTS;
         undoInfo.abilityType = AbilityType::WARRIOR_DAMAGE;
         undoInfo.affectedPieces[0] = abilityDstPiece;
@@ -1126,6 +1157,10 @@ void Game::makeAction(int moveSrcIdx, int moveDstIdx, int abilitySrcIdx, int abi
       case P2_WALL:
         break;
       case P2_ASSASSIN:
+        if(player2OrEmpty(abilityDstPiece->type)) {
+          undoInfo.abilityType = AbilityType::NO_ABILITY;
+          break;
+        }
         abilityDstPiece->healthPoints -= ASSASSIN_ABILITY_POINTS;
         undoInfo.abilityType = AbilityType::ASSASSIN_DAMAGE;
         undoInfo.affectedPieces[0] = abilityDstPiece;
@@ -1633,8 +1668,11 @@ std::vector<PlayerAbility> Game::allLegalAbilitiesByPiece(int srcSquareIdx) {
   return retval;
 }
 
-
-std::vector<PlayerAction> Game::legalActions() {
+/*
+ * Useful actions are those whose abilities change the game state.
+ * For example, warrior attacking an empty square is legal but doesn't change the game state.
+ */
+std::vector<PlayerAction> Game::usefulLegalActions() {
   std::vector<PlayerAction> retval;
   // If King is dead, game is over and there are no legal actions
   if(playerToPieces[currentPlayer][0]->healthPoints <= 0) {
@@ -2368,6 +2406,59 @@ std::vector<PlayerAction> Game::legalActions() {
   return retval;
 }
 
+/*
+ * Includes actions with useless abilities (i.e. those that don't alter the game state)
+ */
+std::vector<PlayerAction> Game::allLegalActions() {
+  std::vector<PlayerAction> retval;
+  // If King is dead, game is over and there are no legal actions
+  if(playerToPieces[currentPlayer][0]->healthPoints <= 0) {
+    return retval;
+  }
+  for(int i = 0; i < NUM_STARTING_PIECES; i++) {
+    Piece* currentPiece = playerToPieces[currentPlayer][i];
+    if(currentPiece->healthPoints <= 0) continue; // dead pieces don't move
+
+    auto legalMoves = pieceTypeToSquareIndexToLegalMoves[currentPiece->type][currentPiece->squareIndex];
+    for(int j = 0; j < legalMoves.size(); j++) {
+      if(board[legalMoves[j].moveDstIdx]->type != NO_PIECE) continue;
+      makeMove(legalMoves[j].moveSrcIdx, legalMoves[j].moveDstIdx);
+      for(int k = 0; k < NUM_STARTING_PIECES; k++) {
+        Piece* cp2 = playerToPieces[currentPlayer][k];
+        if(cp2->healthPoints <= 0) continue; // no abilities for dead pieces
+        auto legalAbilities = pieceTypeToSquareIndexToLegalAbilities[cp2->type][cp2->squareIndex];
+        for(int l = 0; l < legalAbilities.size(); l++) {
+          PlayerAbility currentAbility = legalAbilities[l];
+          Piece* destinationSquarePiece = board[currentAbility.abilityDstIdx];
+
+          PlayerAction p = PlayerAction(legalMoves[j].moveSrcIdx, legalMoves[j].moveDstIdx, currentAbility.abilitySrcIdx, currentAbility.abilityDstIdx);
+          retval.push_back(p);
+        }
+      }
+      // player can skip the ability
+      PlayerAction p = PlayerAction(legalMoves[j].moveSrcIdx, legalMoves[j].moveDstIdx, ABILITY_SKIP, ABILITY_SKIP);
+      retval.push_back(p);
+
+      undoMove(legalMoves[j].moveSrcIdx, legalMoves[j].moveDstIdx);
+    }
+  }
+  // player can skip the move
+  for(int k = 0; k < NUM_STARTING_PIECES; k++) {
+    Piece* cp2 = playerToPieces[currentPlayer][k];
+    if(cp2->healthPoints <= 0) continue; // no abilities for dead pieces
+    auto legalAbilities = pieceTypeToSquareIndexToLegalAbilities[cp2->type][cp2->squareIndex];
+    for(int l = 0; l < legalAbilities.size(); l++) {
+      Piece* destinationSquarePiece = board[legalAbilities[l].abilityDstIdx];
+      PlayerAction p = PlayerAction(MOVE_SKIP, MOVE_SKIP, legalAbilities[l].abilitySrcIdx, legalAbilities[l].abilityDstIdx);
+      retval.push_back(p);
+    }
+  }
+  // player can skip both move and ability
+  PlayerAction p = PlayerAction(MOVE_SKIP, MOVE_SKIP, ABILITY_SKIP, ABILITY_SKIP);
+  retval.push_back(p);
+  return retval;
+}
+
 Player Game::getCurrentPlayer() {
   return currentPlayer;
 }
@@ -2404,7 +2495,7 @@ std::optional<Player> Game::winner() {
 unsigned long long perft(Game& game, int depth) {
   std::vector<PlayerAction> legalActions;
   unsigned long long nodes = 0;
-  legalActions = game.legalActions();
+  legalActions = game.usefulLegalActions();
   int numLegalActions = legalActions.size();
   if(depth == 1) {
     return (unsigned long long) numLegalActions;
@@ -2426,13 +2517,20 @@ unsigned long long perft(Game& game, int depth) {
 
 int main() {
   Game g = Game();
+  /*
   while(true) {
     g.print();
+    auto allLegalActions = g.allLegalActions();
+    auto usefulLegalActions = g.usefulLegalActions();
+    std::cout << "Number of all legal actions: " << allLegalActions.size() << "\n";
+    std::cout << "Number of useful legal actions: " << usefulLegalActions.size() << "\n";
     int pieceX, pieceY;
     std::cout << "Enter piece's x coordinate\n";
     std::cin >> pieceX;
     std::cout << "Enter piece's y coordinate:\n";
     std::cin >> pieceY;
+    Piece p = g.getPieceByCoordinates(pieceX, pieceY);
+    p.print();
     auto legalAbilities = g.allLegalAbilitiesByPiece(coordinatesToBoardIndex(pieceX, pieceY));
     std::cout << "all legal abilities:\n";
     for(int i = 0; i < legalAbilities.size(); i++) {
@@ -2443,8 +2541,8 @@ int main() {
     std::cout << "gameOver: " << gameOver << "\n";
     if(winner)
       std::cout << "winner: " << *winner << "\n";
-
   }
+  */
 
   /*
   std::cout << "Calculating number of nodes at depth 3\n";
@@ -2455,12 +2553,11 @@ int main() {
   std::cout << "Total number of nodes at depth 3: " << nodes << "\n";
   std::cout << "Calculating time: " << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() << "[s]" << std::endl;
   std::cout << "Nodes per second: " << nodes / std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() << std::endl;
- */ 
+  */
 
-  /*
   std::vector<PlayerAction> legalActions;
   while(true) {
-    legalActions = g.legalActions(pttstlm, pttstla);
+    legalActions = g.usefulLegalActions();
      //std::cout << "Total number of legal actions: " << legalActions.size() << "\n";
     g.print();
     if(g.getCurrentPlayer() == PLAYER_1) {
@@ -2510,10 +2607,9 @@ int main() {
         || y1 == -2 || y2 == -2 || y3 == -2 || y4 == -2) { // TODO: testing, delete when done.
       g.undoLastAction();
     } else {
-      g.makeAction(moveSrcIdx, moveDstIdx, abilitySrcIdx, abilityDstIdx, stns);
+      g.makeAction(moveSrcIdx, moveDstIdx, abilitySrcIdx, abilityDstIdx);
     }
     std::cout << "--------------------\n";
   }
-  */
   return 0;
 }

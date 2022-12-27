@@ -109,7 +109,8 @@ class Game {
     void undoMove(int moveSrcIdx, int moveDstIdx);
     void makeAction(int moveSrcIdx, int moveDstIdx, int abilitySrcIdx, int abilityDstIdx);
     void undoLastAction();
-    std::vector<PlayerAction> legalActions();
+    std::vector<PlayerAction> usefulLegalActions();
+    std::vector<PlayerAction> allLegalActions();
     std::vector<PlayerMove> legalMovesByPiece(int srcSquareIdx);
     std::vector<PlayerAbility> usefulLegalAbilitiesByPiece(int srcSquareIdx);
     std::vector<PlayerAbility> allLegalAbilitiesByPiece(int srcSquareIdx);
