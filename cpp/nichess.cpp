@@ -2643,6 +2643,109 @@ std::string Game::boardToString() {
   return retval.str();
 }
 
+void Game::boardFromString(std::string encodedBoard) {
+  currentPlayer = (Player)(std::stoi(encodedBoard.substr(0, encodedBoard.find("|"))));
+  moveNumber = 0;
+  // pieces need to exist in the piece array even if they're dead
+  // first all pieces are initialized as dead, then they're replaced if found in the encodedBoard
+  std::vector<Piece*> p1Pieces(NUM_STARTING_PIECES);
+  p1Pieces[KING_PIECE_INDEX] = new Piece(PieceType::P1_KING, 0, 0);
+  p1Pieces[PAWN_1_PIECE_INDEX] = new Piece(PieceType::P1_PAWN, 0, 0);
+  p1Pieces[PAWN_2_PIECE_INDEX] = new Piece(PieceType::P1_PAWN, 0, 0);
+  p1Pieces[PAWN_3_PIECE_INDEX] = new Piece(PieceType::P1_PAWN, 0, 0);
+  p1Pieces[ASSASSIN_PIECE_INDEX] = new Piece(PieceType::P1_ASSASSIN, 0, 0);
+  p1Pieces[MAGE_PIECE_INDEX] = new Piece(PieceType::P1_MAGE, 0, 0);
+  p1Pieces[WARRIOR_PIECE_INDEX] = new Piece(PieceType::P1_WARRIOR, 0, 0);
+
+  std::vector<Piece*> p2Pieces(NUM_STARTING_PIECES);
+  p2Pieces[KING_PIECE_INDEX] = new Piece(PieceType::P2_KING, 0, 0);
+  p2Pieces[PAWN_1_PIECE_INDEX] = new Piece(PieceType::P2_PAWN, 0, 0);
+  p2Pieces[PAWN_2_PIECE_INDEX] = new Piece(PieceType::P2_PAWN, 0, 0);
+  p2Pieces[PAWN_3_PIECE_INDEX] = new Piece(PieceType::P2_PAWN, 0, 0);
+  p2Pieces[ASSASSIN_PIECE_INDEX] = new Piece(PieceType::P2_ASSASSIN, 0, 0);
+  p2Pieces[MAGE_PIECE_INDEX] = new Piece(PieceType::P2_MAGE, 0, 0);
+  p2Pieces[WARRIOR_PIECE_INDEX] = new Piece(PieceType::P2_WARRIOR, 0, 0);
+
+
+  std::string b1 = encodedBoard.substr(2);
+  std::string delimiter1 = ",";
+  std::string delimiter2 = "-";
+  std::string token1;
+  std::string s, tmp;
+  size_t pos = 0;
+  int boardIdx = 0;
+  while((pos = b1.find(delimiter1)) != std::string::npos) {
+    token1 = b1.substr(0, pos);
+    if(token1 == "empty") {
+      board[boardIdx] = new Piece(PieceType::NO_PIECE, 0, boardIdx);
+    } else {
+      std::stringstream ss(token1);
+      std::vector<std::string> words;
+      while(std::getline(ss, tmp, '-')) {
+        words.push_back(tmp);
+      }
+      int healthPoints = std::stoi(words[2]);
+      s = words[0] + words[1];
+      if(s == "0king") {
+        board[boardIdx] = new Piece(PieceType::P1_KING, healthPoints, boardIdx);
+        p1Pieces[KING_PIECE_INDEX] = board[boardIdx];
+      } else if(s == "0pawn") {
+        board[boardIdx] = new Piece(PieceType::P1_PAWN, healthPoints, boardIdx);
+        if(p1Pieces[PAWN_1_PIECE_INDEX]->healthPoints <= 0) {
+          p1Pieces[PAWN_1_PIECE_INDEX] = board[boardIdx];
+        } else if(p1Pieces[PAWN_2_PIECE_INDEX]->healthPoints <= 0) {
+          p1Pieces[PAWN_2_PIECE_INDEX] = board[boardIdx];
+        } else if(p1Pieces[PAWN_3_PIECE_INDEX]->healthPoints <= 0) {
+          p1Pieces[PAWN_3_PIECE_INDEX] = board[boardIdx];
+        } else {
+          throw "Already found 3 living PLAYER_1 Pawns";
+        }
+      } else if(s == "0mage") {
+        board[boardIdx] = new Piece(PieceType::P1_MAGE, healthPoints, boardIdx);
+        p1Pieces[MAGE_PIECE_INDEX] = board[boardIdx];
+      } else if(s == "0assassin") {
+        board[boardIdx] = new Piece(PieceType::P1_ASSASSIN, healthPoints, boardIdx);
+        p1Pieces[ASSASSIN_PIECE_INDEX] = board[boardIdx];
+      } else if(s == "0warrior") {
+        board[boardIdx] = new Piece(PieceType::P1_WARRIOR, healthPoints, boardIdx);
+        p1Pieces[WARRIOR_PIECE_INDEX] = board[boardIdx];
+      } else if(s == "0wall") {
+        board[boardIdx] = new Piece(PieceType::P1_WALL, healthPoints, boardIdx);
+      } else if(s == "1king") {
+        board[boardIdx] = new Piece(PieceType::P2_KING, healthPoints, boardIdx);
+        p2Pieces[KING_PIECE_INDEX] = board[boardIdx];
+      } else if(s == "1pawn") {
+        board[boardIdx] = new Piece(PieceType::P2_PAWN, healthPoints, boardIdx);
+        if(p2Pieces[PAWN_1_PIECE_INDEX]->healthPoints <= 0) {
+          p2Pieces[PAWN_1_PIECE_INDEX] = board[boardIdx];
+        } else if(p2Pieces[PAWN_2_PIECE_INDEX]->healthPoints <= 0) {
+          p2Pieces[PAWN_2_PIECE_INDEX] = board[boardIdx];
+        } else if(p2Pieces[PAWN_3_PIECE_INDEX]->healthPoints <= 0) {
+          p2Pieces[PAWN_3_PIECE_INDEX] = board[boardIdx];
+        } else {
+          throw "Already found 3 living PLAYER_2 Pawns";
+        }
+      } else if(s == "1mage") {
+        board[boardIdx] = new Piece(PieceType::P2_MAGE, healthPoints, boardIdx);
+        p2Pieces[MAGE_PIECE_INDEX] = board[boardIdx];
+      } else if(s == "1assassin") {
+        board[boardIdx] = new Piece(PieceType::P2_ASSASSIN, healthPoints, boardIdx);
+        p2Pieces[ASSASSIN_PIECE_INDEX] = board[boardIdx];
+      } else if(s == "1warrior") {
+        board[boardIdx] = new Piece(PieceType::P2_WARRIOR, healthPoints, boardIdx);
+        p2Pieces[WARRIOR_PIECE_INDEX] = board[boardIdx];
+      } else if(s == "1wall") {
+        board[boardIdx] = new Piece(PieceType::P2_WALL, healthPoints, boardIdx);
+      }
+    }
+    b1.erase(0, pos + delimiter1.length());
+    boardIdx += 1;
+  }
+
+  playerToPieces[PLAYER_1] = p1Pieces;
+  playerToPieces[PLAYER_2] = p2Pieces;
+}
+
 /* 
  * performance test - https://www.chessprogramming.org/Perft
  * with bulk counting
@@ -2711,8 +2814,9 @@ int main() {
   while(true) {
     legalActions = g.usefulLegalActions();
      //std::cout << "Total number of legal actions: " << legalActions.size() << "\n";
-    //std::string boardString = g.boardToString();
-    //std::cout << boardString << "\n";
+    std::string boardString = g.boardToString();
+    std::cout << boardString << "\n";
+    g.boardFromString(boardString);
     g.print();
     if(g.getCurrentPlayer() == PLAYER_1) {
       std::cout << "Player to move: PLAYER_1 (upper-case letters)\n";

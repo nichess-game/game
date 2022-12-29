@@ -129,6 +129,7 @@ class Game {
     Piece getPieceByCoordinates(int x, int y);
     Piece getPieceBySquareIndex(int squareIndex);
     std::string boardToString();
+    void boardFromString(std::string encodedBoard);
     bool gameOver();
     std::optional<Player> winner();
     void print();
