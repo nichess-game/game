@@ -959,31 +959,25 @@ void Game::reset() {
   board[coordinatesToBoardIndex(7,4)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(7,4));
   board[coordinatesToBoardIndex(7,5)] = new Piece(PieceType::NO_PIECE, 0, coordinatesToBoardIndex(7,5));
 
-
-  p1King = board[coordinatesToBoardIndex(0,0)];
-  p2King = board[coordinatesToBoardIndex(7,7)];
-
   // Piece pointers are also kept in an array for faster access
-  // Order here matters
   std::vector<Piece*> p1Pieces{NUM_STARTING_PIECES};
-  p1Pieces[0] = board[coordinatesToBoardIndex(0,0)];
-  p1Pieces[1] = board[coordinatesToBoardIndex(0,1)];
-  p1Pieces[2] = board[coordinatesToBoardIndex(1,1)];
-  p1Pieces[3] = board[coordinatesToBoardIndex(7,0)];
-  p1Pieces[4] = board[coordinatesToBoardIndex(3,1)];
-  p1Pieces[5] = board[coordinatesToBoardIndex(4,1)];
-  p1Pieces[6] = board[coordinatesToBoardIndex(5,1)];
+  p1Pieces[KING_PIECE_INDEX] = board[coordinatesToBoardIndex(0,0)];
+  p1Pieces[PAWN_1_PIECE_INDEX] = board[coordinatesToBoardIndex(0,1)];
+  p1Pieces[PAWN_2_PIECE_INDEX] = board[coordinatesToBoardIndex(1,1)];
+  p1Pieces[ASSASSIN_PIECE_INDEX] = board[coordinatesToBoardIndex(7,0)];
+  p1Pieces[WARRIOR_PIECE_INDEX] = board[coordinatesToBoardIndex(3,1)];
+  p1Pieces[MAGE_PIECE_INDEX] = board[coordinatesToBoardIndex(4,1)];
+  p1Pieces[PAWN_3_PIECE_INDEX] = board[coordinatesToBoardIndex(5,1)];
   playerToPieces[Player::PLAYER_1] = p1Pieces;
 
-  // Order here matters
   std::vector<Piece*> p2Pieces{NUM_STARTING_PIECES};
-  p2Pieces[0] = board[coordinatesToBoardIndex(7,7)];
-  p2Pieces[1] = board[coordinatesToBoardIndex(7,6)];
-  p2Pieces[2] = board[coordinatesToBoardIndex(6,6)];
-  p2Pieces[3] = board[coordinatesToBoardIndex(0,7)];
-  p2Pieces[4] = board[coordinatesToBoardIndex(4,6)];
-  p2Pieces[5] = board[coordinatesToBoardIndex(2,6)];
-  p2Pieces[6] = board[coordinatesToBoardIndex(3,6)];
+  p2Pieces[KING_PIECE_INDEX] = board[coordinatesToBoardIndex(7,7)];
+  p2Pieces[PAWN_1_PIECE_INDEX] = board[coordinatesToBoardIndex(7,6)];
+  p2Pieces[PAWN_2_PIECE_INDEX] = board[coordinatesToBoardIndex(6,6)];
+  p2Pieces[ASSASSIN_PIECE_INDEX] = board[coordinatesToBoardIndex(0,7)];
+  p2Pieces[WARRIOR_PIECE_INDEX] = board[coordinatesToBoardIndex(4,6)];
+  p2Pieces[MAGE_PIECE_INDEX] = board[coordinatesToBoardIndex(2,6)];
+  p2Pieces[PAWN_3_PIECE_INDEX] = board[coordinatesToBoardIndex(3,6)];
   playerToPieces[Player::PLAYER_2] = p2Pieces;
 }
 
@@ -1683,7 +1677,7 @@ std::vector<PlayerAbility> Game::allLegalAbilitiesByPiece(int srcSquareIdx) {
 std::vector<PlayerAction> Game::usefulLegalActions() {
   std::vector<PlayerAction> retval;
   // If King is dead, game is over and there are no legal actions
-  if(playerToPieces[currentPlayer][0]->healthPoints <= 0) {
+  if(playerToPieces[currentPlayer][KING_PIECE_INDEX]->healthPoints <= 0) {
     return retval;
   }
   for(int i = 0; i < NUM_STARTING_PIECES; i++) {
@@ -2420,7 +2414,7 @@ std::vector<PlayerAction> Game::usefulLegalActions() {
 std::vector<PlayerAction> Game::allLegalActions() {
   std::vector<PlayerAction> retval;
   // If King is dead, game is over and there are no legal actions
-  if(playerToPieces[currentPlayer][0]->healthPoints <= 0) {
+  if(playerToPieces[currentPlayer][KING_PIECE_INDEX]->healthPoints <= 0) {
     return retval;
   }
   for(int i = 0; i < NUM_STARTING_PIECES; i++) {
@@ -2552,7 +2546,7 @@ bool Game::isActionLegal(int moveSrcIdx, int moveDstIdx, int abilitySrcIdx, int 
     undoMove(moveSrcIdx, moveDstIdx);
   }
 
-  currentPlayersKingIsAlive = playerToPieces[currentPlayer][0]->healthPoints > 0;
+  currentPlayersKingIsAlive = playerToPieces[currentPlayer][KING_PIECE_INDEX]->healthPoints > 0;
   
   if(moveLegal && abilityLegal && movePieceBelongsToCurrentPlayerOrMoveSkip &&
       abilityPieceBelongsToCurrentPlayerOrAbilitySkip && movePieceIsAliveOrMoveSkip &&
@@ -2576,6 +2570,8 @@ Piece Game::getPieceBySquareIndex(int squareIndex) {
 }
 
 bool Game::gameOver() {
+  Piece* p1King = playerToPieces[PLAYER_1][KING_PIECE_INDEX];
+  Piece* p2King = playerToPieces[PLAYER_2][KING_PIECE_INDEX];
   if(p1King->healthPoints <= 0 || p2King->healthPoints <= 0) {
     return true;
   } else {
@@ -2584,6 +2580,8 @@ bool Game::gameOver() {
 }
 
 std::optional<Player> Game::winner() {
+  Piece* p1King = playerToPieces[PLAYER_1][KING_PIECE_INDEX];
+  Piece* p2King = playerToPieces[PLAYER_2][KING_PIECE_INDEX];
   if(p1King->healthPoints <= 0) {
     return PLAYER_2;
   } else if(p2King->healthPoints <= 0) {
