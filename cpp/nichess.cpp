@@ -277,6 +277,14 @@ bool isOffBoard(int x, int y) {
     return false;
 }
 
+bool isOffBoard(int squareIndex) {
+  if(squareIndex < 0 || squareIndex > NUM_ROWS * NUM_COLUMNS - 1)
+    return true;
+  else
+    return false;
+}
+
+
 /*
  * For each Piece type, for each square, returns legal moves as if there were no other
  * pieces on the board. Elsewhere, occupied squares will be discarded from the legal moves.
@@ -2459,6 +2467,102 @@ std::vector<PlayerAction> Game::allLegalActions() {
   return retval;
 }
 
+/*
+ * Checks whether values are in the right range.
+ */
+bool isActionValid(int moveSrcIdx, int moveDstIdx, int abilitySrcIdx, int abilityDstIdx) {
+  bool moveValid = false;
+  bool abilityValid = false;
+  if(moveSrcIdx == MOVE_SKIP && moveDstIdx == MOVE_SKIP) {
+    moveValid = true;
+  } else if((!isOffBoard(moveSrcIdx)) && (!isOffBoard(moveDstIdx))) {
+    moveValid = true;
+  }
+  if(abilitySrcIdx == ABILITY_SKIP && abilityDstIdx == ABILITY_SKIP) {
+    abilityValid = true;
+  } else if((!isOffBoard(abilitySrcIdx)) && (!isOffBoard(abilityDstIdx))) {
+    abilityValid = true;
+  }
+  return moveValid && abilityValid;
+}
+
+bool Game::isActionLegal(int moveSrcIdx, int moveDstIdx, int abilitySrcIdx, int abilityDstIdx) {
+  // It's important for this method to not have many exit points because it's altering the game
+  // state. If a return statement is between makeMove and undoMove, game state will remain changed
+  // which shouldn't happen in a method that checks action legality.
+  bool validInput = isActionValid(moveSrcIdx, moveDstIdx, abilitySrcIdx, abilityDstIdx);
+  if(!validInput) return false;
+
+  bool moveLegal = false;
+  bool abilityLegal = false;
+  bool movePieceBelongsToCurrentPlayerOrMoveSkip = false;
+  bool abilityPieceBelongsToCurrentPlayerOrAbilitySkip = false;
+  bool movePieceIsAliveOrMoveSkip = false;
+  bool abilityPieceIsAliveOrAbilitySkip = false;
+  bool currentPlayersKingIsAlive = false;
+  Piece* movePiece;
+  Piece* abilityPiece;
+
+  if(moveSrcIdx == MOVE_SKIP && moveDstIdx == MOVE_SKIP) {
+    moveLegal = true;
+    movePieceBelongsToCurrentPlayerOrMoveSkip = true;
+    movePieceIsAliveOrMoveSkip = true;
+  } else {
+    movePiece = board[moveSrcIdx];
+    if(pieceBelongsToPlayer(movePiece->type, currentPlayer)) {
+      movePieceBelongsToCurrentPlayerOrMoveSkip = true;
+    }
+    if(movePiece->healthPoints > 0) {
+      movePieceIsAliveOrMoveSkip = true;
+    }
+    auto legalMovesOnEmptyBoard = pieceTypeToSquareIndexToLegalMoves[movePiece->type][movePiece->squareIndex];
+    for(int i = 0; i < legalMovesOnEmptyBoard.size(); i++) {
+      PlayerMove currentMove = legalMovesOnEmptyBoard[i];
+      if(board[currentMove.moveDstIdx]->type == NO_PIECE && 
+          currentMove.moveDstIdx == moveDstIdx) {
+        moveLegal = true;
+        makeMove(moveSrcIdx, moveDstIdx);
+        break;
+      }
+    }
+  }
+  if(abilitySrcIdx == ABILITY_SKIP && abilityDstIdx == ABILITY_SKIP) {
+    abilityLegal = true;
+    abilityPieceBelongsToCurrentPlayerOrAbilitySkip = true;
+    abilityPieceIsAliveOrAbilitySkip = true;
+  } else {
+    abilityPiece = board[abilitySrcIdx];
+    if(pieceBelongsToPlayer(abilityPiece->type, currentPlayer)) {
+      abilityPieceBelongsToCurrentPlayerOrAbilitySkip = true;
+    }
+    if(abilityPiece->healthPoints > 0) {
+      abilityPieceIsAliveOrAbilitySkip = true;
+    }
+    auto legalAbilitiesOnEmptyBoard = pieceTypeToSquareIndexToLegalAbilities[abilityPiece->type][abilityPiece->squareIndex];
+    for(int i = 0; i < legalAbilitiesOnEmptyBoard.size(); i++) {
+      PlayerAbility currentAbility = legalAbilitiesOnEmptyBoard[i];
+      if(currentAbility.abilityDstIdx == abilityDstIdx) {
+        abilityLegal = true;
+        break;
+      }
+    }
+  }
+
+  if(moveSrcIdx != MOVE_SKIP) {
+    undoMove(moveSrcIdx, moveDstIdx);
+  }
+
+  currentPlayersKingIsAlive = playerToPieces[currentPlayer][0]->healthPoints > 0;
+  
+  if(moveLegal && abilityLegal && movePieceBelongsToCurrentPlayerOrMoveSkip &&
+      abilityPieceBelongsToCurrentPlayerOrAbilitySkip && movePieceIsAliveOrMoveSkip &&
+      abilityPieceIsAliveOrAbilitySkip && currentPlayersKingIsAlive) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 Player Game::getCurrentPlayer() {
   return currentPlayer;
 }
@@ -2488,6 +2592,59 @@ std::optional<Player> Game::winner() {
   return std::nullopt;
 }
 
+std::string Game::boardToString() {
+  std::stringstream retval;
+  retval << currentPlayer << "|";
+  Piece* currentPiece;
+  for(int i = 0; i < NUM_ROWS*NUM_COLUMNS; i++) {
+    currentPiece = board[i];
+    if(currentPiece->type == NO_PIECE) {
+      retval << "empty,";
+    } else {
+      switch(currentPiece->type) {
+        case P1_KING:
+          retval << "0-king-";
+          break;
+        case P1_MAGE:
+          retval << "0-mage-";
+          break;
+        case P1_PAWN:
+          retval << "0-pawn-";
+          break;
+        case P1_WARRIOR:
+          retval << "0-warrior-";
+          break;
+        case P1_WALL:
+          retval << "0-wall-";
+          break;
+        case P1_ASSASSIN:
+          retval << "0-assassin-";
+          break;
+        case P2_KING:
+          retval << "1-king-";
+          break;
+        case P2_MAGE:
+          retval << "1-mage-";
+          break;
+        case P2_PAWN:
+          retval << "1-pawn-";
+          break;
+        case P2_WARRIOR:
+          retval << "1-warrior-";
+          break;
+        case P2_WALL:
+          retval << "1-wall-";
+          break;
+        case P2_ASSASSIN:
+          retval << "1-assassin-";
+          break;
+      }        
+      retval << currentPiece->healthPoints << ",";
+    }
+  }
+  return retval.str();
+}
+
 /* 
  * performance test - https://www.chessprogramming.org/Perft
  * with bulk counting
@@ -2511,9 +2668,6 @@ unsigned long long perft(Game& game, int depth) {
 
   return nodes;
 }
-
-
-
 
 int main() {
   Game g = Game();
@@ -2559,6 +2713,8 @@ int main() {
   while(true) {
     legalActions = g.usefulLegalActions();
      //std::cout << "Total number of legal actions: " << legalActions.size() << "\n";
+    //std::string boardString = g.boardToString();
+    //std::cout << boardString << "\n";
     g.print();
     if(g.getCurrentPlayer() == PLAYER_1) {
       std::cout << "Player to move: PLAYER_1 (upper-case letters)\n";

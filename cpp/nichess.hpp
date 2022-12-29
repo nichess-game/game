@@ -107,6 +107,7 @@ class Game {
     Game();
     void makeMove(int moveSrcIdx, int moveDstIdx);
     void undoMove(int moveSrcIdx, int moveDstIdx);
+    bool isActionLegal(int moveSrcIdx, int moveDstIdx, int abilitySrcIdx, int abilityDstIdx);
     void makeAction(int moveSrcIdx, int moveDstIdx, int abilitySrcIdx, int abilityDstIdx);
     void undoLastAction();
     std::vector<PlayerAction> usefulLegalActions();
@@ -117,6 +118,7 @@ class Game {
     Player getCurrentPlayer();
     Piece getPieceByCoordinates(int x, int y);
     Piece getPieceBySquareIndex(int squareIndex);
+    std::string boardToString();
     bool gameOver();
     std::optional<Player> winner();
     void print();
