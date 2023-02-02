@@ -152,11 +152,11 @@ bool pieceBelongsToPlayer(PieceType pt, Player player) {
 /*
  * Coordinates are not standard. Bottom left is (0,0) and top right is (7,7)
  */
-int coordinatesToBoardIndex(int column, int row) {
+int nichess::coordinatesToBoardIndex(int column, int row) {
   return column + row * NUM_COLUMNS;
 }
 
-std::tuple<int, int> boardIndexToCoordinates(int squareIndex) {
+std::tuple<int, int> nichess::boardIndexToCoordinates(int squareIndex) {
   int x = squareIndex -  (floor(squareIndex / NUM_ROWS) * NUM_ROWS);
   int y = floor(squareIndex / NUM_ROWS);
   return std::tuple<int, int>(x, y);
@@ -2770,6 +2770,11 @@ unsigned long long perft(Game& game, int depth) {
   return nodes;
 }
 
+std::vector<Piece*> Game::getAllPiecesByPlayer(Player player) {
+  return playerToPieces[player];
+}
+
+
 int main() {
   Game g = Game();
   /*
@@ -2798,8 +2803,6 @@ int main() {
       std::cout << "winner: " << *winner << "\n";
   }
   */
-
-  /*
   std::cout << "Calculating number of nodes at depth 3\n";
   std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
@@ -2808,7 +2811,7 @@ int main() {
   std::cout << "Total number of nodes at depth 3: " << nodes << "\n";
   std::cout << "Calculating time: " << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() << "[s]" << std::endl;
   std::cout << "Nodes per second: " << nodes / std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() << std::endl;
-  */
+  /*
 
   std::vector<PlayerAction> legalActions;
   while(true) {
@@ -2869,5 +2872,6 @@ int main() {
     }
     std::cout << "--------------------\n";
   }
+  */
   return 0;
 }

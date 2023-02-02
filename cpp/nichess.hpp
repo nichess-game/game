@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <optional>
+#include <tuple>
 
 namespace nichess {
 
@@ -128,6 +129,7 @@ class Game {
     Player getCurrentPlayer();
     Piece getPieceByCoordinates(int x, int y);
     Piece getPieceBySquareIndex(int squareIndex);
+    std::vector<Piece*> getAllPiecesByPlayer(Player player);
     std::string boardToString();
     void boardFromString(std::string encodedBoard);
     bool gameOver();
@@ -135,5 +137,9 @@ class Game {
     void print();
     void reset();
 };
+
+int coordinatesToBoardIndex(int column, int row);
+
+std::tuple<int, int> boardIndexToCoordinates(int squareIndex);
 
 } // namespace nichess
