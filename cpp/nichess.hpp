@@ -142,4 +142,6 @@ int coordinatesToBoardIndex(int column, int row);
 
 std::tuple<int, int> boardIndexToCoordinates(int squareIndex);
 
+unsigned long long perft(Game& game, int depth);
+
 } // namespace nichess
