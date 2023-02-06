@@ -1,5 +1,5 @@
-#include "nichess.hpp"
-#include "util.hpp"
+#include "nichess/nichess.hpp"
+#include "nichess/util.hpp"
 
 #include <iostream>
 #include <sstream>

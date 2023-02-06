@@ -1,5 +1,6 @@
-Requires C++17 or later. Compile with:
+Requires C++17 and CMake 3.14 or newer. Compile with:
 
 ```
-g++ nichess.cpp util.cpp -std=c++17
+cmake -S . -B build
+cmake --build build
 ```

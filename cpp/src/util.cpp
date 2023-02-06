@@ -1,4 +1,4 @@
-#include "util.hpp"
+#include "nichess/util.hpp"
 
 std::string playerToString(Player p) {
   switch(p) {
