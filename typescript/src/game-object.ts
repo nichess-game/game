@@ -60,11 +60,6 @@ export class Assassin extends Piece {
   }
 }
 
-export class Wall extends Piece {
-  constructor(x: number, y: number, player: Player) {
-    super(x, y, player, 'wall', 100, 0)
-  }
-}
 
 
 export class Empty extends GameObject {

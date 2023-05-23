@@ -1,6 +1,6 @@
 import { Board } from './board'
 import { Player, Phase } from './constants'
-import { GameObject, Empty, Piece, Mage, King, Pawn, Warrior, Wall, getMoveOffsets, getAbilityOffsets } from './game-object'
+import { GameObject, Empty, Piece, Mage, King, Pawn, Warrior, getMoveOffsets, getAbilityOffsets } from './game-object'
 import { Move } from './move'
 import { Ability } from './ability'
 
@@ -53,29 +53,6 @@ export class Game {
     this._history = []
   }
 
-  _pawnAbility(pawn: Pawn, destinationX: number, destinationY: number): boolean {
-    var destinationPiece = this._board.getGameObjectByCoordinates(destinationX, destinationY) as Piece
-    let legalAbilities: Ability[] = this.legalAbilities(pawn.x, pawn.y)
-
-    if(destinationPiece instanceof Empty) {
-      this._board.addGameObject(destinationX, destinationY, new Wall(destinationX, destinationY, pawn.player))
-      return true
-    }
-    if(destinationPiece instanceof Wall) {
-      this._board.addGameObject(destinationX, destinationY, new Empty(destinationX, destinationY))
-      return true
-    }
-
-    if(destinationPiece instanceof Piece && destinationPiece.player != pawn.player) {
-      destinationPiece.healthPoints -= pawn.abilityPoints
-      this._board.removeIfDead(destinationPiece)
-      return true
-    }
-
-    return false
-    
-  }
-    
   _mageAbility(sourcePiece: Piece, destinationX: number, destinationY: number): boolean {
     var enemyPiece = this._board.getGameObjectByCoordinates(destinationX, destinationY) as Piece
     if(enemyPiece instanceof Empty)
@@ -129,10 +106,7 @@ export class Game {
 
     for(let i = 0; i < legalAbilities.length; i++) {
       if(legalAbilities[i].dstX == destinationX && legalAbilities[i].dstY == destinationY) {
-        if(sourcePiece instanceof Pawn) {
-          success = this._pawnAbility(sourcePiece, destinationX, destinationY)
-        }
-        else if(sourcePiece instanceof Mage) {
+        if(sourcePiece instanceof Mage) {
           success = this._mageAbility(sourcePiece, destinationX, destinationY)
         }
         else {
@@ -156,8 +130,7 @@ export class Game {
       return []
     var retval: Ability[] = []
     var sourcePiece = this._board.getGameObjectByCoordinates(pieceX, pieceY) as Piece
-    if((sourcePiece.player != this._board.playerTurn()) ||
-      sourcePiece instanceof Wall) {
+    if(sourcePiece.player != this._board.playerTurn()) {
       return []
     }
     var abilityOffsets = getAbilityOffsets(sourcePiece)
@@ -194,8 +167,7 @@ export class Game {
       return []
     var retval: Move[] = []
     var sourcePiece = this._board.getGameObjectByCoordinates(pieceX, pieceY) as Piece
-    if((sourcePiece.player != this._board.playerTurn()) ||
-      sourcePiece instanceof Wall) {
+    if(sourcePiece.player != this._board.playerTurn()) {
       return []
     }
     var moveOffsets = getMoveOffsets(sourcePiece)

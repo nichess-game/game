@@ -1,5 +1,5 @@
 import { Position } from './position'
-import { GameObject, Mage, Wall, Pawn, Warrior, King, Empty, Piece, Assassin } from './game-object'
+import { GameObject, Mage, Pawn, Warrior, King, Empty, Piece, Assassin } from './game-object'
 import { Player, Phase } from './constants'
 
 export class Board {
@@ -37,7 +37,6 @@ export class Board {
       this.board.set(JSON.stringify(new Position(4, 6)), new Warrior(4, 6, Player.PLAYER_2));
       this.board.set(JSON.stringify(new Position(2, 6)), new Pawn(2, 6, Player.PLAYER_2));
       this.board.set(JSON.stringify(new Position(3, 6)), new Mage(3, 6, Player.PLAYER_2));
-
     }
   }
 
@@ -94,8 +93,6 @@ export class Board {
             piece = new Assassin(j, i, player)
           } else if(type == 'warrior') {
             piece = new Warrior(j, i, player)
-          } else if(type == 'wall') {
-            piece = new Wall(j, i, player)
           } else {
             piece = new King(j, i, player)
           }
